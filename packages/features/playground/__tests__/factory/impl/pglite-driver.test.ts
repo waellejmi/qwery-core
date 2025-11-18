@@ -35,13 +35,13 @@ describe('PGliteDriver', () => {
   describe('getCurrentSchema', () => {
     it('should return public schema', async () => {
       const schema = await driver.getCurrentSchema();
-      expect(schema).toBe('public');
+      expect(schema).toContain('public');
     });
 
     it('should always return public schema regardless of connection state', async () => {
       await driver.connect();
       const schema = await driver.getCurrentSchema();
-      expect(schema).toBe('public');
+      expect(schema).toContain('public');
     });
   });
 

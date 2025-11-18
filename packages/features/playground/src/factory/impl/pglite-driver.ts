@@ -1,6 +1,8 @@
 import { PGlite } from '@electric-sql/pglite';
 
 import { DatasourceDriver, DatasourceResultSet } from '@qwery/extensions-sdk';
+import type { SimpleSchema } from '@qwery/domain/entities';
+import { formatSchemaForLLM } from '../../utils/schema-formatter';
 
 export class PGliteDriver extends DatasourceDriver {
   private db: PGlite | null = null;
@@ -10,8 +12,96 @@ export class PGliteDriver extends DatasourceDriver {
   }
 
   async getCurrentSchema(): Promise<string | null> {
-    // PostgreSQL default schema
-    return 'public';
+    if (!this.db) {
+      await this.connect();
+    }
+
+    try {
+      // Get database name
+      const dbResult = await this.db!.query(
+        'SELECT current_database() as database_name',
+      );
+      const databaseName =
+        (dbResult.rows[0] as { database_name: string })?.database_name ||
+        this.name;
+
+      // Get schema name (default to 'public')
+      const schemaName = 'public';
+
+      // Get all tables in the public schema
+      const tablesResult = await this.db!.query(`
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_type = 'BASE TABLE'
+        ORDER BY table_name
+      `);
+
+      const tables: SimpleSchema['tables'] = [];
+
+      for (const tableRow of tablesResult.rows) {
+        const tableName = (tableRow as { table_name: string }).table_name;
+
+        // Get columns for each table
+        const columnsResult = await this.db!.query(
+          `
+          SELECT column_name, data_type, character_maximum_length, numeric_precision, numeric_scale
+          FROM information_schema.columns
+          WHERE table_schema = 'public' AND table_name = $1
+          ORDER BY ordinal_position
+        `,
+          [tableName],
+        );
+
+        const columns = columnsResult.rows.map((col) => {
+          const colData = col as {
+            column_name: string;
+            data_type: string;
+            character_maximum_length: number | null;
+            numeric_precision: number | null;
+            numeric_scale: number | null;
+          };
+
+          let columnType = colData.data_type;
+
+          // Format column type with length/precision if applicable
+          if (colData.character_maximum_length) {
+            columnType = `${columnType}(${colData.character_maximum_length})`;
+          } else if (
+            colData.numeric_precision !== null &&
+            colData.numeric_scale !== null
+          ) {
+            columnType = `${columnType}(${colData.numeric_precision},${colData.numeric_scale})`;
+          } else if (colData.numeric_precision !== null) {
+            columnType = `${columnType}(${colData.numeric_precision})`;
+          }
+
+          return {
+            columnName: colData.column_name,
+            columnType,
+          };
+        });
+
+        tables.push({
+          tableName,
+          columns,
+        });
+      }
+
+      const schema: SimpleSchema = {
+        databaseName,
+        schemaName,
+        tables,
+      };
+
+      // Convert to readable string format for LLM
+      const schemaString = formatSchemaForLLM(schema);
+
+      return schemaString;
+    } catch (error) {
+      console.error('Error getting schema:', error);
+      return null;
+    }
   }
 
   async testConnection(): Promise<boolean> {

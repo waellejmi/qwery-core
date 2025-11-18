@@ -34,6 +34,11 @@ interface NotebookUIProps {
   title?: string;
   datasources?: Array<{ id: string; name: string }>;
   onRunQuery?: (cellId: number, query: string, datasourceId: string) => void;
+  onRunQueryWithAgent?: (
+    cellId: number,
+    query: string,
+    datasourceId: string,
+  ) => void;
   onCellsChange?: (cells: NotebookCellData[]) => void;
   onNotebookChange?: (notebook: Partial<Notebook>) => void;
   cellResults?: Map<number, DatasourceResultSet>;
@@ -49,6 +54,7 @@ function SortableCell({
   onQueryChange,
   onDatasourceChange,
   onRunQuery,
+  onRunQueryWithAgent,
   datasources,
   result,
   error,
@@ -66,6 +72,7 @@ function SortableCell({
   onQueryChange: (query: string) => void;
   onDatasourceChange: (datasourceId: string) => void;
   onRunQuery?: (query: string, datasourceId: string) => void;
+  onRunQueryWithAgent?: (query: string, datasourceId: string) => void;
   datasources: Array<{ id: string; name: string }>;
   result?: DatasourceResultSet | null;
   error?: string;
@@ -103,6 +110,7 @@ function SortableCell({
         onQueryChange={onQueryChange}
         onDatasourceChange={onDatasourceChange}
         onRunQuery={onRunQuery}
+        onRunQueryWithAgent={onRunQueryWithAgent}
         dragHandleProps={{ ...attributes, ...listeners }}
         isDragging={isDragging}
         result={result}
@@ -125,6 +133,7 @@ export function NotebookUI({
   title,
   datasources = [],
   onRunQuery,
+  onRunQueryWithAgent,
   onCellsChange,
   onNotebookChange,
   cellResults: externalCellResults,
@@ -275,6 +284,14 @@ export function NotebookUI({
     datasourceId: string,
   ) => {
     onRunQuery?.(cellId, query, datasourceId);
+  };
+
+  const handleRunQueryWithAgent = (
+    cellId: number,
+    query: string,
+    datasourceId: string,
+  ) => {
+    onRunQueryWithAgent?.(cellId, query, datasourceId);
   };
 
   const handleMoveCellUp = (cellId: number) => {
@@ -502,6 +519,13 @@ export function NotebookUI({
                       }
                       onRunQuery={(query, datasourceId) => {
                         handleRunQuery(cell.cellId, query, datasourceId);
+                      }}
+                      onRunQueryWithAgent={(query, datasourceId) => {
+                        handleRunQueryWithAgent(
+                          cell.cellId,
+                          query,
+                          datasourceId,
+                        );
                       }}
                       datasources={allDatasources}
                       result={cellResults.get(cell.cellId)}

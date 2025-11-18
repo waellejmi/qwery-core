@@ -8,7 +8,7 @@ export function AgentUIWrapper() {
   const transport = useMemo(
     () =>
       new LangGraphTransport({
-        model: 'Llama-3.1-8B-Instruct-q4f32_1',
+        model: 'Llama-3.1-8B-Instruct-q4f32_1-MLC',
         maxIterations: 10,
         // Tools can be added here later
         // tools: [/* custom tools */],

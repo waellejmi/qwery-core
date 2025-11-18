@@ -11,6 +11,7 @@ import { Toaster } from '@qwery/ui/sonner';
 import { i18nResolver } from '~/lib/i18n/i18n.resolver';
 import { getI18nSettings } from '~/lib/i18n/i18n.settings';
 
+import { AgentsProvider } from '@qwery/ai-agents/components/agents-provider';
 import { ReactQueryProvider } from './react-query-provider';
 import { WorkspaceProvider } from './workspace-provider';
 import { TelemetryProvider } from '@qwery/telemetry';
@@ -50,7 +51,9 @@ export function RootProviders(
               defaultTheme={props.theme}
               enableColorScheme={false}
             >
-              <WorkspaceProvider>{props.children}</WorkspaceProvider>
+              <WorkspaceProvider>
+                <AgentsProvider>{props.children}</AgentsProvider>
+              </WorkspaceProvider>
             </ThemeProvider>
           </ReactQueryProvider>
         </TelemetryProvider>

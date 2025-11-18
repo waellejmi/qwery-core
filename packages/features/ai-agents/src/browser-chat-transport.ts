@@ -19,7 +19,7 @@ export class BrowserChatTransport<UI_MESSAGE extends UIMessage>
   private initProgressCallback?: InitProgressCallback;
 
   constructor(options: BrowserChatTransportOptions = {}) {
-    this.model = options.model || 'Llama-3.1-8B-Instruct-q4f32_1';
+    this.model = options.model || 'Llama-3.1-8B-Instruct-q4f32_1-MLC';
     this.initProgressCallback = options.initProgressCallback;
   }
 

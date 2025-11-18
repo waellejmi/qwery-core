@@ -14,6 +14,7 @@ import { NotebookCellData, NotebookUI } from '@qwery/notebook';
 import { useWorkspace } from '~/lib/context/workspace-context';
 import { useNotebook } from '~/lib/mutations/use-notebook';
 import { useRunQuery } from '~/lib/mutations/use-run-query';
+import { useRunQueryWithAgent } from '~/lib/mutations/use-run-query-with-agent';
 import { useGetDatasourcesByProjectId } from '~/lib/queries/use-get-datasources';
 import { useGetNotebook } from '~/lib/queries/use-get-notebook';
 import { NOTEBOOK_EVENTS, telemetry } from '@qwery/telemetry';
@@ -96,6 +97,7 @@ export default function NotebookPage() {
     query: string,
     datasourceId: string,
   ) => {
+    console.log('handleRunQuery', cellId, query, datasourceId);
     const datasource = savedDatasources.data?.find(
       (ds) => ds.id === datasourceId,
     );
@@ -114,6 +116,50 @@ export default function NotebookPage() {
       query,
       datasourceId,
       datasource,
+    });
+  };
+
+  // Run query with agent mutation
+  const runQueryWithAgentMutation = useRunQueryWithAgent(
+    (sqlQuery, cellId, datasourceId) => {
+      // Agent generated SQL successfully, now run it
+      handleRunQuery(cellId, sqlQuery, datasourceId);
+    },
+    (error, cellId, query) => {
+      setCellErrors((prev) => {
+        const next = new Map(prev);
+        next.set(
+          cellId,
+          `${error.message} 
+          sqlQuery: ${query}`,
+        );
+        return next;
+      });
+      // Clear result on error
+      setCellResults((prev) => {
+        const next = new Map(prev);
+        next.delete(cellId);
+        return next;
+      });
+      setLoadingCellId(null);
+    },
+  );
+
+  const handleRunQueryWithAgent = (
+    cellId: number,
+    query: string,
+    datasourceId: string,
+  ) => {
+    setLoadingCellId(cellId);
+    telemetry.trackEvent(NOTEBOOK_EVENTS.NOTEBOOK_RUN_QUERY, {
+      query,
+      datasourceName: datasourceId,
+    });
+    runQueryWithAgentMutation.mutate({
+      cellId,
+      query,
+      datasourceId,
+      datasourceRepository,
     });
   };
 
@@ -174,7 +220,10 @@ export default function NotebookPage() {
   // Create loading states map
   const cellLoadingStates = new Map<number, boolean>();
   if (loadingCellId !== null) {
-    cellLoadingStates.set(loadingCellId, runQueryMutation.isPending);
+    cellLoadingStates.set(
+      loadingCellId,
+      runQueryMutation.isPending || runQueryWithAgentMutation.isPending,
+    );
   }
 
   // Convert NotebookUseCaseDto to Notebook format
@@ -203,6 +252,7 @@ export default function NotebookPage() {
           onRunQuery={handleRunQuery}
           onCellsChange={handleCellsChange}
           onNotebookChange={handleNotebookChange}
+          onRunQueryWithAgent={handleRunQueryWithAgent}
           cellResults={cellResults}
           cellErrors={cellErrors}
           cellLoadingStates={cellLoadingStates}

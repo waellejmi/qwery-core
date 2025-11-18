@@ -147,3 +147,6 @@ storybook-static
 # Desktop app
 apps/desktop/release
 apps/desktop/dist
+
+# macOS
+.DS_Store

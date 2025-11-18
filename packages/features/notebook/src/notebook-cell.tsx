@@ -18,6 +18,7 @@ import {
   Maximize2,
   MoreVertical,
   PlayIcon,
+  Sparkles,
   Trash2,
 } from 'lucide-react';
 import { AlertCircle } from 'lucide-react';
@@ -62,6 +63,7 @@ interface NotebookCellProps {
   onQueryChange: (query: string) => void;
   onDatasourceChange: (datasourceId: string) => void;
   onRunQuery?: (query: string, datasourceId: string) => void;
+  onRunQueryWithAgent?: (query: string, datasourceId: string) => void;
   dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>;
   isDragging?: boolean;
   result?: DatasourceResultSet | null;
@@ -83,6 +85,7 @@ export function NotebookCell({
   onQueryChange,
   onDatasourceChange,
   onRunQuery,
+  onRunQueryWithAgent,
   dragHandleProps,
   isDragging,
   result,
@@ -135,6 +138,17 @@ export function NotebookCell({
       selectedDatasource
     ) {
       onRunQuery(query, selectedDatasource);
+    }
+  };
+
+  const handleRunQueryWithAgent = () => {
+    if (
+      onRunQueryWithAgent &&
+      query &&
+      cell.cellType === 'query' &&
+      selectedDatasource
+    ) {
+      onRunQueryWithAgent(query, selectedDatasource);
     }
   };
 
@@ -201,17 +215,22 @@ export function NotebookCell({
                     <PlayIcon className="h-4 w-4" />
                   )}
                 </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size="icon" variant="ghost" className="h-7 w-7">
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem>Run current cell</DropdownMenuItem>
-                    <DropdownMenuItem>Run all cells</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                {onRunQueryWithAgent && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7 cursor-pointer"
+                    onClick={handleRunQueryWithAgent}
+                    disabled={!query.trim() || isLoading}
+                    aria-label="Run query with agent"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
               </div>
             )}
 

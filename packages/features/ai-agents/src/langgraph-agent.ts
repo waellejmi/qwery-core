@@ -28,7 +28,7 @@ export interface LangGraphAgentOptions {
  */
 export function createLangGraphAgent(options: LangGraphAgentOptions = {}) {
   const {
-    model = 'Llama-3.1-8B-Instruct-q4f32_1',
+    model = 'Llama-3.1-8B-Instruct-q4f32_1-MLC',
     tools = [],
     temperature = 0.1,
     initProgressCallback,

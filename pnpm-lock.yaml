@@ -508,6 +508,12 @@ importers:
       '@mlc-ai/web-llm':
         specifier: ^0.2.79
         version: 0.2.79
+      '@qwery/domain':
+        specifier: workspace:*
+        version: link:../../domain
+      '@qwery/extensions-sdk':
+        specifier: workspace:*
+        version: link:../../extensions-sdk
       ai:
         specifier: ^5.0.93
         version: 5.0.93(zod@3.25.76)

@@ -16,13 +16,17 @@
     "./langgraph-transport": "./src/langgraph-transport.ts",
     "./langgraph-agent": "./src/langgraph-agent.ts",
     "./tool-registry": "./src/tool-registry.ts",
-    "./tools/base-tool": "./src/tools/base-tool.ts"
+    "./tools/base-tool": "./src/tools/base-tool.ts",
+    "./components/agents-provider": "./src/components/agents-provider.tsx",
+    "./hooks/use-agents": "./src/hooks/use-agents.tsx"
   },
   "dependencies": {
     "@langchain/community": "^0.3.0",
     "@langchain/core": "^0.3.0",
     "@langchain/langgraph": "^0.2.0",
     "@mlc-ai/web-llm": "^0.2.79",
+    "@qwery/domain": "workspace:*",
+    "@qwery/extensions-sdk": "workspace:*",
     "ai": "^5.0.93",
     "nanoid": "^5.1.6"
   },

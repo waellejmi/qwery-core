@@ -36,3 +36,18 @@ export const SchemaDefinition = z.object({
 });
 
 export type Schema = z.infer<typeof SchemaDefinition>;
+
+export type Table = {
+  tableName: string;
+  columns: Column[];
+};
+
+export type Column = {
+  columnName: string;
+  columnType: string;
+};
+export type SimpleSchema = {
+  databaseName: string;
+  schemaName: string;
+  tables: Table[];
+};

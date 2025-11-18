@@ -35,7 +35,7 @@ export class WebLLMChatModel extends BaseChatModel {
 
   constructor(params: WebLLMChatModelParams = {}) {
     super(params);
-    this.model = params.model || 'Llama-3.1-8B-Instruct-q4f32_1';
+    this.model = params.model || 'Llama-3.1-8B-Instruct-q4f32_1-MLC';
     this.temperature = params.temperature ?? 0.7;
     this.initProgressCallback = params.initProgressCallback;
   }

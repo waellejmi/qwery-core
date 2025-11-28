@@ -2,38 +2,46 @@ import { generateObject } from 'ai';
 import { z } from 'zod';
 import { fromPromise } from 'xstate/actors';
 import { IntentSchema } from '../types';
-import { createAzure } from '@ai-sdk/azure';
+import { createAzure, type AzureOpenAIProviderSettings } from '@ai-sdk/azure';
 import { DETECT_INTENT_PROMPT } from '../prompts/detect-intent.prompt';
 
 export const detectIntent = async (text: string) => {
   try {
     const apiKey = process.env.AZURE_API_KEY || process.env.VITE_AZURE_API_KEY;
-    const resourceName = process.env.AZURE_RESOURCE_NAME || process.env.VITE_AZURE_RESOURCE_NAME;
-    const deployment = process.env.AZURE_OPENAI_DEPLOYMENT || process.env.VITE_AZURE_OPENAI_DEPLOYMENT || 'gpt-5-mini';
-    
+    const resourceName =
+      process.env.AZURE_RESOURCE_NAME || process.env.VITE_AZURE_RESOURCE_NAME;
+    const deployment =
+      process.env.AZURE_OPENAI_DEPLOYMENT ||
+      process.env.VITE_AZURE_OPENAI_DEPLOYMENT ||
+      'gpt-5-mini';
+
     if (!apiKey || !resourceName) {
-      throw new Error('Azure credentials missing: AZURE_API_KEY and AZURE_RESOURCE_NAME required');
+      throw new Error(
+        'Azure credentials missing: AZURE_API_KEY and AZURE_RESOURCE_NAME required',
+      );
     }
-    
-    const azureOptions: any = {
+
+    const azureOptions: AzureOpenAIProviderSettings = {
       apiKey,
       resourceName,
+      ...(process.env.AZURE_API_VERSION && {
+        apiVersion: process.env.AZURE_API_VERSION,
+      }),
+      ...(process.env.AZURE_OPENAI_BASE_URL && {
+        baseURL: process.env.AZURE_OPENAI_BASE_URL,
+      }),
     };
-    
-    if (process.env.AZURE_API_VERSION) {
-      azureOptions.apiVersion = process.env.AZURE_API_VERSION;
-    }
-    if (process.env.AZURE_OPENAI_BASE_URL) {
-      azureOptions.baseURL = process.env.AZURE_OPENAI_BASE_URL;
-    }
-    
+
     const azure = createAzure(azureOptions);
-    
+
     // Add timeout to detect hanging calls
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('generateObject timeout after 30 seconds')), 30000);
+      setTimeout(
+        () => reject(new Error('generateObject timeout after 30 seconds')),
+        30000,
+      );
     });
-    
+
     const generatePromise = generateObject({
       model: azure(deployment),
       schema: IntentSchema,
@@ -43,7 +51,10 @@ export const detectIntent = async (text: string) => {
     const result = await Promise.race([generatePromise, timeoutPromise]);
     return result.object;
   } catch (error) {
-    console.error('[detectIntent] ERROR:', error instanceof Error ? error.message : String(error));
+    console.error(
+      '[detectIntent] ERROR:',
+      error instanceof Error ? error.message : String(error),
+    );
     if (error instanceof Error && error.stack) {
       console.error('[detectIntent] Stack:', error.stack);
     }

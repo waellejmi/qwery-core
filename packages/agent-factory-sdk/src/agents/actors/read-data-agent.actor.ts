@@ -25,8 +25,9 @@ import {
   loadBusinessContext,
 } from '../../services/business-context.service';
 
-// Support both import.meta.env (Vite/browser) and process.env (Node.js)
-const WORKSPACE = resolveWorkspaceDir();
+// Lazy workspace resolution - only resolve when actually needed, not at module load time
+// This prevents side effects when the module is imported in browser/SSR contexts
+let WORKSPACE_CACHE: string | undefined;
 
 function resolveWorkspaceDir(): string | undefined {
   const globalProcess =
@@ -49,6 +50,13 @@ function resolveWorkspaceDir(): string | undefined {
   }
 }
 
+function getWorkspace(): string | undefined {
+  if (WORKSPACE_CACHE === undefined) {
+    WORKSPACE_CACHE = resolveWorkspaceDir();
+  }
+  return WORKSPACE_CACHE;
+}
+
 export const readDataAgent = async (
   conversationId: string,
   messages: UIMessage[],
@@ -62,11 +70,12 @@ export const readDataAgent = async (
           'Test the connection to the database to check if the database is accessible',
         inputSchema: z.object({}),
         execute: async () => {
-          if (!WORKSPACE) {
+          const workspace = getWorkspace();
+          if (!workspace) {
             throw new Error('WORKSPACE environment variable is not set');
           }
           const { join } = await import('node:path');
-          const dbPath = join(WORKSPACE, conversationId, 'database.db');
+          const dbPath = join(workspace, conversationId, 'database.db');
           const result = await testConnection({
             dbPath: dbPath,
           });
@@ -79,13 +88,14 @@ export const readDataAgent = async (
           sharedLink: z.string(),
         }),
         execute: async ({ sharedLink }) => {
-          if (!WORKSPACE) {
+          const workspace = getWorkspace();
+          if (!workspace) {
             throw new Error('WORKSPACE environment variable is not set');
           }
           const { join } = await import('node:path');
           const { mkdir } = await import('node:fs/promises');
-          await mkdir(WORKSPACE, { recursive: true });
-          const fileDir = join(WORKSPACE, conversationId);
+          await mkdir(workspace, { recursive: true });
+          const fileDir = join(workspace, conversationId);
           await mkdir(fileDir, { recursive: true });
           const dbPath = join(fileDir, 'database.db');
 
@@ -139,11 +149,12 @@ export const readDataAgent = async (
           'List all available views (sheets) in the database. Use this to see what data sources are available when the user asks about multiple sheets or when you need to know which view to query.',
         inputSchema: z.object({}),
         execute: async () => {
-          if (!WORKSPACE) {
+          const workspace = getWorkspace();
+          if (!workspace) {
             throw new Error('WORKSPACE environment variable is not set');
           }
           const { join } = await import('node:path');
-          const fileDir = join(WORKSPACE, conversationId);
+          const fileDir = join(workspace, conversationId);
           const context: RegistryContext = {
             conversationDir: fileDir,
           };
@@ -166,12 +177,13 @@ export const readDataAgent = async (
           viewName: z.string().optional(),
         }),
         execute: async ({ viewName }) => {
-          if (!WORKSPACE) {
+          const workspace = getWorkspace();
+          if (!workspace) {
             throw new Error('WORKSPACE environment variable is not set');
           }
           const { join } = await import('node:path');
-          const dbPath = join(WORKSPACE, conversationId, 'database.db');
-          const fileDir = join(WORKSPACE, conversationId);
+          const dbPath = join(workspace, conversationId, 'database.db');
+          const fileDir = join(workspace, conversationId);
 
           const schema = await extractSchema({ dbPath, viewName });
 
@@ -219,11 +231,12 @@ export const readDataAgent = async (
           query: z.string(),
         }),
         execute: async ({ query }) => {
-          if (!WORKSPACE) {
+          const workspace = getWorkspace();
+          if (!workspace) {
             throw new Error('WORKSPACE environment variable is not set');
           }
           const { join } = await import('node:path');
-          const dbPath = join(WORKSPACE, conversationId, 'database.db');
+          const dbPath = join(workspace, conversationId, 'database.db');
 
           const result = await runQuery({
             dbPath,
@@ -231,7 +244,7 @@ export const readDataAgent = async (
           });
 
           // Try to extract view names from the query to update usage
-          const fileDirPath = join(WORKSPACE, conversationId);
+          const fileDirPath = join(workspace, conversationId);
           const context: RegistryContext = {
             conversationDir: fileDirPath,
           };

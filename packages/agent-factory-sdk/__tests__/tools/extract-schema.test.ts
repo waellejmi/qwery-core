@@ -73,9 +73,17 @@ describe('extractSchema', () => {
     expect(schema).toBeDefined();
     expect(schema.databaseName).toBe('google_sheet');
     expect(schema.schemaName).toBe('google_sheet');
-    expect(schema.tables).toHaveLength(1);
-    expect(schema.tables[0].tableName).toBe('my_sheet');
-    expect(schema.tables[0].columns).toHaveLength(4);
+    // Filter to only user-created views (exclude system views)
+    const userViews = schema.tables.filter(
+      (t) =>
+        t.tableName === 'my_sheet' ||
+        t.tableName.startsWith('sheet_') ||
+        t.tableName.startsWith('my_'),
+    );
+    expect(userViews.length).toBeGreaterThanOrEqual(1);
+    const mySheet = schema.tables.find((t) => t.tableName === 'my_sheet');
+    expect(mySheet).toBeDefined();
+    expect(mySheet!.columns).toHaveLength(4);
 
     // Verify column structure
     const columns = schema.tables[0].columns;

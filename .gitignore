@@ -171,4 +171,5 @@ test-*.js
 test-*.mjs
 test-*.sh
 test-*.log
-packages/agent-factory-sdk/test-business-context/
+test-business-context/
+packages/agent-factory-sdk/test-business-context/.vscode/

@@ -89,12 +89,17 @@ export class FactoryAgent {
       const sendUserInput = () => {
         if (!userInputSent) {
           userInputSent = true;
-          console.log(`[FactoryAgent ${this.id}] Sending USER_INPUT event with message: "${currentInputMessage}"`);
+          console.log(
+            `[FactoryAgent ${this.id}] Sending USER_INPUT event with message: "${currentInputMessage}"`,
+          );
           this.factoryActor.send({
             type: 'USER_INPUT',
             messages: opts.messages,
           });
-          console.log(`[FactoryAgent ${this.id}] USER_INPUT sent, current state:`, this.factoryActor.getSnapshot().value);
+          console.log(
+            `[FactoryAgent ${this.id}] USER_INPUT sent, current state:`,
+            this.factoryActor.getSnapshot().value,
+          );
         }
       };
 
@@ -108,8 +113,14 @@ export class FactoryAgent {
         stateChangeCount++;
 
         // Debug logging for state transitions
-        if (stateChangeCount <= 5 || currentState.includes('detectIntent') || currentState.includes('greeting')) {
-          console.log(`[FactoryAgent ${this.id}] State: ${currentState}, Changes: ${stateChangeCount}, HasError: ${!!ctx.error}, HasStreamResult: ${!!ctx.streamResult}`);
+        if (
+          stateChangeCount <= 5 ||
+          currentState.includes('detectIntent') ||
+          currentState.includes('greeting')
+        ) {
+          console.log(
+            `[FactoryAgent ${this.id}] State: ${currentState}, Changes: ${stateChangeCount}, HasError: ${!!ctx.error}, HasStreamResult: ${!!ctx.streamResult}`,
+          );
         }
 
         // Wait for idle state before sending USER_INPUT
@@ -120,7 +131,10 @@ export class FactoryAgent {
 
         // Check for errors in context
         if (ctx.error) {
-          console.error(`[FactoryAgent ${this.id}] Error in context:`, ctx.error);
+          console.error(
+            `[FactoryAgent ${this.id}] Error in context:`,
+            ctx.error,
+          );
           if (!resolved) {
             resolved = true;
             clearTimeout(timeout);

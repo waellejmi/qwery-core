@@ -6,7 +6,12 @@ import { InteractiveQueryHandler } from './interactive-query-handler';
 import { InteractiveCommandRouter } from './interactive-command-router';
 import { printInteractiveResult } from '../utils/output';
 import { colored, colors } from '../utils/formatting';
-import { FactoryAgent, validateUIMessages, MessagePersistenceService, type UIMessage } from '@qwery/agent-factory-sdk';
+import {
+  FactoryAgent,
+  validateUIMessages,
+  MessagePersistenceService,
+  type UIMessage,
+} from '@qwery/agent-factory-sdk';
 import { nanoid } from 'nanoid';
 
 export class InteractiveRepl {
@@ -156,10 +161,10 @@ export class InteractiveRepl {
     try {
       // Check if this is a Google Sheet query (contains google.com/spreadsheets)
       const isGoogleSheetQuery = /google\.com\/spreadsheets/.test(query);
-      
+
       // Also check if query is about sheets/views (likely Google Sheets context)
       // OR if we're already in a readDataAgent session
-      const isSheetRelatedQuery = 
+      const isSheetRelatedQuery =
         /(list.*views?|join.*sheets?|sheet|view|google.*sheet)/i.test(query) ||
         this.isReadDataAgentSession;
 
@@ -262,7 +267,9 @@ export class InteractiveRepl {
       const { nanoid } = await import('nanoid');
       const { validateUIMessages } = await import('ai');
       const { v4: uuidv4 } = await import('uuid');
-      const { GetMessagesByConversationIdService } = await import('@qwery/domain/services');
+      const { GetMessagesByConversationIdService } = await import(
+        '@qwery/domain/services'
+      );
 
       // Use a persistent conversation ID for follow-up questions
       if (!this.conversationId || !this.conversationId.includes('read-data')) {
@@ -273,7 +280,9 @@ export class InteractiveRepl {
       const repositories = this.container.getRepositories();
 
       // Ensure conversation exists in repository
-      let conversation = await repositories.conversation.findBySlug(this.conversationId);
+      let conversation = await repositories.conversation.findBySlug(
+        this.conversationId,
+      );
       if (!conversation) {
         // Conversation doesn't exist, create it
         const conversationId = uuidv4();
@@ -291,21 +300,28 @@ export class InteractiveRepl {
           updatedBy: 'cli',
         });
         // Reload conversation to ensure it exists
-        conversation = await repositories.conversation.findBySlug(this.conversationId);
+        conversation = await repositories.conversation.findBySlug(
+          this.conversationId,
+        );
         if (!conversation) {
-          throw new Error(`Failed to create conversation with slug: ${this.conversationId}`);
+          throw new Error(
+            `Failed to create conversation with slug: ${this.conversationId}`,
+          );
         }
       }
 
       // Load previous messages from conversation
-      const loadMessagesUseCase = new GetMessagesByConversationIdService(repositories.message);
+      const loadMessagesUseCase = new GetMessagesByConversationIdService(
+        repositories.message,
+      );
       let previousMessages: UIMessage[] = [];
       if (conversation) {
         try {
-          const messageOutputs = await loadMessagesUseCase.execute({ 
-            conversationId: conversation.id 
+          const messageOutputs = await loadMessagesUseCase.execute({
+            conversationId: conversation.id,
           });
-          previousMessages = MessagePersistenceService.convertToUIMessages(messageOutputs);
+          previousMessages =
+            MessagePersistenceService.convertToUIMessages(messageOutputs);
         } catch {
           // No previous messages, start fresh
           previousMessages = [];
@@ -337,17 +353,17 @@ export class InteractiveRepl {
 
       // Get the stream from readDataAgent (returns StreamTextResult)
       const streamResult = await readDataAgent(this.conversationId, messages);
-      
+
       // Iterate over the stream directly using AI SDK's stream methods
       let fullText = '';
-      
+
       try {
         // Stream text chunks in real-time
         for await (const chunk of streamResult.textStream) {
           process.stdout.write(chunk);
           fullText += chunk;
         }
-        
+
         // Handle tool calls if they exist (they're promises that resolve to arrays)
         if (streamResult.toolCalls) {
           try {
@@ -371,7 +387,7 @@ export class InteractiveRepl {
             // Tool calls might not be available, ignore
           }
         }
-        
+
         // Handle tool results if they exist (they're promises that resolve to arrays)
         if (streamResult.toolResults) {
           try {
@@ -380,7 +396,10 @@ export class InteractiveRepl {
               for (const toolResult of toolResults) {
                 console.log(
                   '\n' +
-                    colored(`✅ [Tool Result: ${toolResult.toolName}]`, colors.green),
+                    colored(
+                      `✅ [Tool Result: ${toolResult.toolName}]`,
+                      colors.green,
+                    ),
                 );
               }
             }
@@ -396,7 +415,10 @@ export class InteractiveRepl {
             role: 'assistant',
             parts: [{ type: 'text', text: fullText }],
           };
-          await messagePersistenceService.persistMessages([assistantMessage], 'agent');
+          await messagePersistenceService.persistMessages(
+            [assistantMessage],
+            'agent',
+          );
         }
       } catch (error) {
         console.error(
@@ -428,7 +450,7 @@ export class InteractiveRepl {
       if (!this.agent || !this.conversationId) {
         this.conversationId = `cli-agent-${nanoid()}`;
         const repositories = this.container.getRepositories();
-        
+
         // Create the conversation before creating the FactoryAgent
         // (FactoryAgent needs the conversation to exist when persisting messages)
         const { v4: uuidv4 } = await import('uuid');
@@ -446,7 +468,7 @@ export class InteractiveRepl {
           createdBy: 'cli',
           updatedBy: 'cli',
         });
-        
+
         this.agent = new FactoryAgent({
           conversationSlug: this.conversationId,
           repositories,

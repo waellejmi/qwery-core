@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   analyzeSchemaAndUpdateContext,
   loadBusinessContext,
-  type BusinessContext,
 } from '../../src/services/business-context.service';
 import type { SimpleSchema } from '@qwery/domain/entities';
 import { join } from 'node:path';
@@ -84,7 +83,11 @@ describe('BusinessContextService', () => {
       ],
     };
 
-    const context = await analyzeSchemaAndUpdateContext(testDir, 'orders', schema2);
+    const context = await analyzeSchemaAndUpdateContext(
+      testDir,
+      'orders',
+      schema2,
+    );
 
     expect(context.relationships.length).toBeGreaterThan(0);
     expect(context.entityGraph.size).toBeGreaterThan(0);
@@ -114,4 +117,3 @@ describe('BusinessContextService', () => {
     expect(loaded?.entities.size).toBeGreaterThan(0);
   });
 });
-

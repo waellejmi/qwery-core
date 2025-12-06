@@ -41,7 +41,6 @@ interface AvailableSheetsVisualizerProps {
   onDeleteSheets?: (sheetNames: string[]) => void;
   onRenameSheet?: (oldSheetName: string, newSheetName: string) => void;
   isRequestInProgress?: boolean;
-  hideViewButtons?: boolean;
 }
 
 export function AvailableSheetsVisualizer({
@@ -50,7 +49,6 @@ export function AvailableSheetsVisualizer({
   onDeleteSheets,
   onRenameSheet,
   isRequestInProgress = false,
-  hideViewButtons = false,
 }: AvailableSheetsVisualizerProps) {
   const { sheets, message } = data;
   const [clickedSheet, setClickedSheet] = useState<string | null>(null);
@@ -386,8 +384,7 @@ export function AvailableSheetsVisualizer({
                   )}
                 </div>
               ) : (
-                onViewSheet &&
-                !hideViewButtons && (
+                onViewSheet && (
                   <Button
                     variant={isClicked ? 'default' : 'outline'}
                     size="sm"

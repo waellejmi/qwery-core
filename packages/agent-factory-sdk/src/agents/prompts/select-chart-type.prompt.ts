@@ -10,6 +10,7 @@ export const SELECT_CHART_TYPE_PROMPT = (
     rows: Array<Record<string, unknown>>;
     columns: string[];
   },
+  businessContext?: { domain: string; entities: Array<{ name: string; columns: string[] }>; relationships: Array<{ from: string; to: string; join: string }> } | null,
 ) => `You are a Chart Type Selection Agent. Your task is to analyze the user's request, SQL query, and query results to determine the best chart type for visualization.
 
 ${getChartsInfoForPrompt()}
@@ -24,6 +25,13 @@ Analysis Guidelines:
 - Look for time/date columns → suggests line chart
 - Look for categorical groupings → suggests bar chart
 - Look for proportions/percentages → suggests pie chart
+${businessContext ? `- Use business context to understand data semantics:
+  * Domain: ${businessContext.domain}
+  * Key entities: ${businessContext.entities.map(e => e.name).join(', ')}
+  * Use entity relationships to understand data connections
+  * If query involves time-based entities or temporal relationships → prefer line chart
+  * If query involves categorical entities or comparisons → prefer bar chart
+  * If query involves proportions or parts of a whole → prefer pie chart` : ''}
 
 User Input: string (the original user request)
 

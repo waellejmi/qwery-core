@@ -795,7 +795,6 @@ export default function QweryAgentUI(props: QweryAgentUIProps) {
                                               status === 'submitted' ||
                                               hasViewSheetInMessage
                                             }
-                                            hideViewButtons={hasViewSheetInMessage}
                                             onViewSheet={(sheetName) => {
                                               sendMessage({
                                                 text: `View sheet "${sheetName}"`,

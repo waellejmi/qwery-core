@@ -60,4 +60,3 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return handleDomainException(error);
   }
 }
-

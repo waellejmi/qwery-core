@@ -1,0 +1,616 @@
+{
+  "buildManifest": {
+    "serverBundles": {
+      "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0": {
+        "id": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+        "file": "build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/index.js",
+        "config": {
+          "runtime": "nodejs"
+        }
+      }
+    },
+    "routeIdToServerBundleId": {
+      "root": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/version": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/healthcheck": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/ingest.$": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api/chat": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api/organization/get-all-organizations": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api/organization/organization": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api/project/get-all-projects": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api/project/project": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api/datasource/datasource": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api/notebook/get-all-notebooks": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api/notebook/notebook": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api/conversation/get-all-conversations": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api/conversation/conversation": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api/conversation/get-messages": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api/usage/usage": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/organizations/index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/organization/index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/project/index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/project/notebook": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/project/datasources/index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/project/datasources/sources": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/project/datasources/new": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/project/datasources/view": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/project/playground": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/project/conversation/index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/project/conversation/conversation": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0"
+    },
+    "routes": {
+      "root": {
+        "id": "root",
+        "file": "app/root.tsx",
+        "path": "",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/version": {
+        "id": "routes/version",
+        "parentId": "root",
+        "file": "app/routes/version.ts",
+        "path": "version",
+        "config": {}
+      },
+      "routes/healthcheck": {
+        "id": "routes/healthcheck",
+        "parentId": "root",
+        "file": "app/routes/healthcheck.ts",
+        "path": "healthcheck",
+        "config": {}
+      },
+      "routes/ingest.$": {
+        "id": "routes/ingest.$",
+        "parentId": "root",
+        "file": "app/routes/ingest.$.ts",
+        "path": "qwery/*",
+        "config": {}
+      },
+      "routes/api/chat": {
+        "id": "routes/api/chat",
+        "parentId": "root",
+        "file": "app/routes/api/chat.ts",
+        "path": "api/chat/:slug",
+        "config": {}
+      },
+      "routes/api/organization/get-all-organizations": {
+        "id": "routes/api/organization/get-all-organizations",
+        "parentId": "root",
+        "file": "app/routes/api/organization/get-all-organizations.ts",
+        "path": "api/organizations",
+        "config": {}
+      },
+      "routes/api/organization/organization": {
+        "id": "routes/api/organization/organization",
+        "parentId": "root",
+        "file": "app/routes/api/organization/organization.ts",
+        "path": "api/organizations/:id",
+        "config": {}
+      },
+      "routes/api/project/get-all-projects": {
+        "id": "routes/api/project/get-all-projects",
+        "parentId": "root",
+        "file": "app/routes/api/project/get-all-projects.ts",
+        "path": "api/projects",
+        "config": {}
+      },
+      "routes/api/project/project": {
+        "id": "routes/api/project/project",
+        "parentId": "root",
+        "file": "app/routes/api/project/project.ts",
+        "path": "api/projects/:id",
+        "config": {}
+      },
+      "routes/api/datasource/datasource": {
+        "id": "routes/api/datasource/datasource",
+        "parentId": "root",
+        "file": "app/routes/api/datasource/datasource.ts",
+        "path": "api/datasources/:id?",
+        "config": {}
+      },
+      "routes/api/notebook/get-all-notebooks": {
+        "id": "routes/api/notebook/get-all-notebooks",
+        "parentId": "root",
+        "file": "app/routes/api/notebook/get-all-notebooks.ts",
+        "path": "api/notebooks",
+        "config": {}
+      },
+      "routes/api/notebook/notebook": {
+        "id": "routes/api/notebook/notebook",
+        "parentId": "root",
+        "file": "app/routes/api/notebook/notebook.ts",
+        "path": "api/notebooks/:id",
+        "config": {}
+      },
+      "routes/api/conversation/get-all-conversations": {
+        "id": "routes/api/conversation/get-all-conversations",
+        "parentId": "root",
+        "file": "app/routes/api/conversation/get-all-conversations.ts",
+        "path": "api/conversations",
+        "config": {}
+      },
+      "routes/api/conversation/conversation": {
+        "id": "routes/api/conversation/conversation",
+        "parentId": "root",
+        "file": "app/routes/api/conversation/conversation.ts",
+        "path": "api/conversations/:id",
+        "config": {}
+      },
+      "routes/api/conversation/get-messages": {
+        "id": "routes/api/conversation/get-messages",
+        "parentId": "root",
+        "file": "app/routes/api/conversation/get-messages.ts",
+        "path": "api/messages",
+        "config": {}
+      },
+      "routes/api/usage/usage": {
+        "id": "routes/api/usage/usage",
+        "parentId": "root",
+        "file": "app/routes/api/usage/usage.ts",
+        "path": "api/usage",
+        "config": {}
+      },
+      "routes/layout/layout": {
+        "id": "routes/layout/layout",
+        "parentId": "root",
+        "file": "app/routes/layout/layout.tsx",
+        "config": {}
+      },
+      "routes/index": {
+        "id": "routes/index",
+        "parentId": "routes/layout/layout",
+        "file": "app/routes/index.tsx",
+        "index": true,
+        "config": {}
+      },
+      "routes/organizations/layout": {
+        "id": "routes/organizations/layout",
+        "parentId": "root",
+        "file": "app/routes/organizations/layout.tsx",
+        "config": {}
+      },
+      "routes/organizations/index": {
+        "id": "routes/organizations/index",
+        "parentId": "routes/organizations/layout",
+        "file": "app/routes/organizations/index.tsx",
+        "path": "organizations",
+        "config": {}
+      },
+      "routes/organization/layout": {
+        "id": "routes/organization/layout",
+        "parentId": "root",
+        "file": "app/routes/organization/layout.tsx",
+        "config": {}
+      },
+      "routes/organization/index": {
+        "id": "routes/organization/index",
+        "parentId": "routes/organization/layout",
+        "file": "app/routes/organization/index.tsx",
+        "path": "org/:slug",
+        "config": {}
+      },
+      "routes/project/layout": {
+        "id": "routes/project/layout",
+        "parentId": "root",
+        "file": "app/routes/project/layout.tsx",
+        "config": {}
+      },
+      "routes/project/index": {
+        "id": "routes/project/index",
+        "parentId": "routes/project/layout",
+        "file": "app/routes/project/index.tsx",
+        "path": "prj/:slug",
+        "config": {}
+      },
+      "routes/project/notebook": {
+        "id": "routes/project/notebook",
+        "parentId": "routes/project/layout",
+        "file": "app/routes/project/notebook.tsx",
+        "path": "notebook/:slug",
+        "config": {}
+      },
+      "routes/project/datasources/index": {
+        "id": "routes/project/datasources/index",
+        "parentId": "routes/project/layout",
+        "file": "app/routes/project/datasources/index.tsx",
+        "path": "prj/:slug/ds",
+        "config": {}
+      },
+      "routes/project/datasources/sources": {
+        "id": "routes/project/datasources/sources",
+        "parentId": "routes/project/layout",
+        "file": "app/routes/project/datasources/sources.tsx",
+        "path": "prj/:slug/ds/new",
+        "config": {}
+      },
+      "routes/project/datasources/new": {
+        "id": "routes/project/datasources/new",
+        "parentId": "routes/project/layout",
+        "file": "app/routes/project/datasources/new.tsx",
+        "path": "prj/:slug/ds/:id/new",
+        "config": {}
+      },
+      "routes/project/datasources/view": {
+        "id": "routes/project/datasources/view",
+        "parentId": "routes/project/layout",
+        "file": "app/routes/project/datasources/view.tsx",
+        "path": "ds/:slug",
+        "config": {}
+      },
+      "routes/project/playground": {
+        "id": "routes/project/playground",
+        "parentId": "routes/project/layout",
+        "file": "app/routes/project/playground.tsx",
+        "path": "prj/:slug/playground",
+        "config": {}
+      },
+      "routes/project/conversation/index": {
+        "id": "routes/project/conversation/index",
+        "parentId": "routes/project/layout",
+        "file": "app/routes/project/conversation/index.tsx",
+        "path": "prj/:slug/c",
+        "config": {}
+      },
+      "routes/project/conversation/conversation": {
+        "id": "routes/project/conversation/conversation",
+        "parentId": "routes/project/layout",
+        "file": "app/routes/project/conversation/conversation.tsx",
+        "path": "c/:slug",
+        "config": {}
+      }
+    }
+  },
+  "reactRouterConfig": {
+    "appDirectory": "/Users/hani.chalouati/Documents/work/guepard/qwery-core/apps/web/app",
+    "basename": "/",
+    "buildDirectory": "/Users/hani.chalouati/Documents/work/guepard/qwery-core/apps/web/build",
+    "future": {
+      "v8_middleware": false,
+      "unstable_optimizeDeps": false,
+      "unstable_splitRouteModules": false,
+      "unstable_subResourceIntegrity": false,
+      "unstable_viteEnvironmentApi": false
+    },
+    "routes": {
+      "root": {
+        "id": "root",
+        "file": "root.tsx",
+        "path": ""
+      },
+      "routes/version": {
+        "id": "routes/version",
+        "parentId": "root",
+        "file": "routes/version.ts",
+        "path": "version"
+      },
+      "routes/healthcheck": {
+        "id": "routes/healthcheck",
+        "parentId": "root",
+        "file": "routes/healthcheck.ts",
+        "path": "healthcheck"
+      },
+      "routes/ingest.$": {
+        "id": "routes/ingest.$",
+        "parentId": "root",
+        "file": "routes/ingest.$.ts",
+        "path": "qwery/*"
+      },
+      "routes/api/chat": {
+        "id": "routes/api/chat",
+        "parentId": "root",
+        "file": "routes/api/chat.ts",
+        "path": "api/chat/:slug"
+      },
+      "routes/api/organization/get-all-organizations": {
+        "id": "routes/api/organization/get-all-organizations",
+        "parentId": "root",
+        "file": "routes/api/organization/get-all-organizations.ts",
+        "path": "api/organizations"
+      },
+      "routes/api/organization/organization": {
+        "id": "routes/api/organization/organization",
+        "parentId": "root",
+        "file": "routes/api/organization/organization.ts",
+        "path": "api/organizations/:id"
+      },
+      "routes/api/project/get-all-projects": {
+        "id": "routes/api/project/get-all-projects",
+        "parentId": "root",
+        "file": "routes/api/project/get-all-projects.ts",
+        "path": "api/projects"
+      },
+      "routes/api/project/project": {
+        "id": "routes/api/project/project",
+        "parentId": "root",
+        "file": "routes/api/project/project.ts",
+        "path": "api/projects/:id"
+      },
+      "routes/api/datasource/datasource": {
+        "id": "routes/api/datasource/datasource",
+        "parentId": "root",
+        "file": "routes/api/datasource/datasource.ts",
+        "path": "api/datasources/:id?"
+      },
+      "routes/api/notebook/get-all-notebooks": {
+        "id": "routes/api/notebook/get-all-notebooks",
+        "parentId": "root",
+        "file": "routes/api/notebook/get-all-notebooks.ts",
+        "path": "api/notebooks"
+      },
+      "routes/api/notebook/notebook": {
+        "id": "routes/api/notebook/notebook",
+        "parentId": "root",
+        "file": "routes/api/notebook/notebook.ts",
+        "path": "api/notebooks/:id"
+      },
+      "routes/api/conversation/get-all-conversations": {
+        "id": "routes/api/conversation/get-all-conversations",
+        "parentId": "root",
+        "file": "routes/api/conversation/get-all-conversations.ts",
+        "path": "api/conversations"
+      },
+      "routes/api/conversation/conversation": {
+        "id": "routes/api/conversation/conversation",
+        "parentId": "root",
+        "file": "routes/api/conversation/conversation.ts",
+        "path": "api/conversations/:id"
+      },
+      "routes/api/conversation/get-messages": {
+        "id": "routes/api/conversation/get-messages",
+        "parentId": "root",
+        "file": "routes/api/conversation/get-messages.ts",
+        "path": "api/messages"
+      },
+      "routes/api/usage/usage": {
+        "id": "routes/api/usage/usage",
+        "parentId": "root",
+        "file": "routes/api/usage/usage.ts",
+        "path": "api/usage"
+      },
+      "routes/layout/layout": {
+        "id": "routes/layout/layout",
+        "parentId": "root",
+        "file": "routes/layout/layout.tsx"
+      },
+      "routes/index": {
+        "id": "routes/index",
+        "parentId": "routes/layout/layout",
+        "file": "routes/index.tsx",
+        "index": true
+      },
+      "routes/organizations/layout": {
+        "id": "routes/organizations/layout",
+        "parentId": "root",
+        "file": "routes/organizations/layout.tsx"
+      },
+      "routes/organizations/index": {
+        "id": "routes/organizations/index",
+        "parentId": "routes/organizations/layout",
+        "file": "routes/organizations/index.tsx",
+        "path": "organizations"
+      },
+      "routes/organization/layout": {
+        "id": "routes/organization/layout",
+        "parentId": "root",
+        "file": "routes/organization/layout.tsx"
+      },
+      "routes/organization/index": {
+        "id": "routes/organization/index",
+        "parentId": "routes/organization/layout",
+        "file": "routes/organization/index.tsx",
+        "path": "org/:slug"
+      },
+      "routes/project/layout": {
+        "id": "routes/project/layout",
+        "parentId": "root",
+        "file": "routes/project/layout.tsx"
+      },
+      "routes/project/index": {
+        "id": "routes/project/index",
+        "parentId": "routes/project/layout",
+        "file": "routes/project/index.tsx",
+        "path": "prj/:slug"
+      },
+      "routes/project/notebook": {
+        "id": "routes/project/notebook",
+        "parentId": "routes/project/layout",
+        "file": "routes/project/notebook.tsx",
+        "path": "notebook/:slug"
+      },
+      "routes/project/datasources/index": {
+        "id": "routes/project/datasources/index",
+        "parentId": "routes/project/layout",
+        "file": "routes/project/datasources/index.tsx",
+        "path": "prj/:slug/ds"
+      },
+      "routes/project/datasources/sources": {
+        "id": "routes/project/datasources/sources",
+        "parentId": "routes/project/layout",
+        "file": "routes/project/datasources/sources.tsx",
+        "path": "prj/:slug/ds/new"
+      },
+      "routes/project/datasources/new": {
+        "id": "routes/project/datasources/new",
+        "parentId": "routes/project/layout",
+        "file": "routes/project/datasources/new.tsx",
+        "path": "prj/:slug/ds/:id/new"
+      },
+      "routes/project/datasources/view": {
+        "id": "routes/project/datasources/view",
+        "parentId": "routes/project/layout",
+        "file": "routes/project/datasources/view.tsx",
+        "path": "ds/:slug"
+      },
+      "routes/project/playground": {
+        "id": "routes/project/playground",
+        "parentId": "routes/project/layout",
+        "file": "routes/project/playground.tsx",
+        "path": "prj/:slug/playground"
+      },
+      "routes/project/conversation/index": {
+        "id": "routes/project/conversation/index",
+        "parentId": "routes/project/layout",
+        "file": "routes/project/conversation/index.tsx",
+        "path": "prj/:slug/c"
+      },
+      "routes/project/conversation/conversation": {
+        "id": "routes/project/conversation/conversation",
+        "parentId": "routes/project/layout",
+        "file": "routes/project/conversation/conversation.tsx",
+        "path": "c/:slug"
+      }
+    },
+    "routeDiscovery": {
+      "mode": "lazy",
+      "manifestPath": "/__manifest"
+    },
+    "serverBuildFile": "index.js",
+    "serverModuleFormat": "esm",
+    "ssr": true,
+    "unstable_routeConfig": [
+      {
+        "id": "root",
+        "path": "",
+        "file": "root.tsx",
+        "children": [
+          {
+            "file": "routes/version.ts",
+            "path": "version"
+          },
+          {
+            "file": "routes/healthcheck.ts",
+            "path": "healthcheck"
+          },
+          {
+            "file": "routes/ingest.$.ts",
+            "path": "qwery/*"
+          },
+          {
+            "file": "routes/api/chat.ts",
+            "path": "api/chat/:slug"
+          },
+          {
+            "file": "routes/api/organization/get-all-organizations.ts",
+            "path": "api/organizations"
+          },
+          {
+            "file": "routes/api/organization/organization.ts",
+            "path": "api/organizations/:id"
+          },
+          {
+            "file": "routes/api/project/get-all-projects.ts",
+            "path": "api/projects"
+          },
+          {
+            "file": "routes/api/project/project.ts",
+            "path": "api/projects/:id"
+          },
+          {
+            "file": "routes/api/datasource/datasource.ts",
+            "path": "api/datasources/:id?"
+          },
+          {
+            "file": "routes/api/notebook/get-all-notebooks.ts",
+            "path": "api/notebooks"
+          },
+          {
+            "file": "routes/api/notebook/notebook.ts",
+            "path": "api/notebooks/:id"
+          },
+          {
+            "file": "routes/api/conversation/get-all-conversations.ts",
+            "path": "api/conversations"
+          },
+          {
+            "file": "routes/api/conversation/conversation.ts",
+            "path": "api/conversations/:id"
+          },
+          {
+            "file": "routes/api/conversation/get-messages.ts",
+            "path": "api/messages"
+          },
+          {
+            "file": "routes/api/usage/usage.ts",
+            "path": "api/usage"
+          },
+          {
+            "file": "routes/layout/layout.tsx",
+            "children": [
+              {
+                "file": "routes/index.tsx",
+                "index": true
+              }
+            ]
+          },
+          {
+            "file": "routes/organizations/layout.tsx",
+            "children": [
+              {
+                "file": "routes/organizations/index.tsx",
+                "path": "organizations"
+              }
+            ]
+          },
+          {
+            "file": "routes/organization/layout.tsx",
+            "children": [
+              {
+                "file": "routes/organization/index.tsx",
+                "path": "org/:slug"
+              }
+            ]
+          },
+          {
+            "file": "routes/project/layout.tsx",
+            "children": [
+              {
+                "file": "routes/project/index.tsx",
+                "path": "prj/:slug"
+              },
+              {
+                "file": "routes/project/notebook.tsx",
+                "path": "notebook/:slug"
+              },
+              {
+                "file": "routes/project/datasources/index.tsx",
+                "path": "prj/:slug/ds"
+              },
+              {
+                "file": "routes/project/datasources/sources.tsx",
+                "path": "prj/:slug/ds/new"
+              },
+              {
+                "file": "routes/project/datasources/new.tsx",
+                "path": "prj/:slug/ds/:id/new"
+              },
+              {
+                "file": "routes/project/datasources/view.tsx",
+                "path": "ds/:slug"
+              },
+              {
+                "file": "routes/project/playground.tsx",
+                "path": "prj/:slug/playground"
+              },
+              {
+                "file": "routes/project/conversation/index.tsx",
+                "path": "prj/:slug/c"
+              },
+              {
+                "file": "routes/project/conversation/conversation.tsx",
+                "path": "c/:slug"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "viteConfig": {
+    "build": {
+      "assetsDir": "assets"
+    }
+  }
+}

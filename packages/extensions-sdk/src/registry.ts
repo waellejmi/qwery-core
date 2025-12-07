@@ -1,80 +1,105 @@
+import {
+  getDiscoveredDatasource,
+  getDiscoveredDatasources,
+  type DiscoveredDriver,
+} from './manifest-discovery';
+import { loadDriverInstance } from './runtime-driver-loader';
 import type { DatasourceExtension, ExtensionMetadata } from './types';
 import { ExtensionScope } from './types';
 
-// Store all registered extensions
-const extensions = new Map<string, DatasourceExtension>();
+// Legacy holder to keep API surface stable; not used for discovery.
+const legacyExtensions = new Map<string, DatasourceExtension>();
 
-/**
- * Register a extension in the static registry
- * This is called by individual extension modules
- */
 export function registerExtension(extension: DatasourceExtension): void {
-  extensions.set(extension.id, extension);
+  legacyExtensions.set(extension.id, extension);
 }
 
-/**
- * Get a extension by its ID
- */
+function pickDriver(drivers: DiscoveredDriver[], config: unknown) {
+  const cfg = config as { driverId?: string } | undefined;
+  if (cfg?.driverId) {
+    const match = drivers.find((d) => d.id === cfg.driverId);
+    if (match) return match;
+  }
+
+  const browserPreferred =
+    typeof window !== 'undefined' &&
+    drivers.find((d) => d.runtime === 'browser');
+  if (browserPreferred) return browserPreferred;
+
+  return drivers[0];
+}
+
+function normalizeIconPath(
+  icon: string | undefined,
+  datasourceId: string,
+): string {
+  if (!icon) return '';
+  // If already an absolute path (starts with /), return as is
+  if (icon.startsWith('/')) return icon;
+  // If relative path, convert to public path
+  const filename = icon.split('/').pop() || icon;
+  return `/extensions/${datasourceId}/${filename}`;
+}
+
 export async function getExtension(
   id: string,
 ): Promise<DatasourceExtension | undefined> {
-  await loadExtensions();
-  return extensions.get(id);
-}
+  const ds = await getDiscoveredDatasource(id);
+  if (!ds) return undefined;
 
-/**
- * Get all extensions
- */
-export async function getAllExtensions(): Promise<DatasourceExtension[]> {
-  await loadExtensions();
-  return Array.from(extensions.values());
-}
-
-/**
- * Get extension metadata (for listing without full extension)
- */
-export async function getExtensionMetadata(
-  id: string,
-): Promise<ExtensionMetadata | undefined> {
-  const extension = await getExtension(id);
-  if (!extension) return undefined;
+  const drivers = ds.drivers;
 
   return {
-    id: extension.id,
-    name: extension.name,
-    logo: extension.logo,
-    description: extension.description,
-    tags: extension.tags,
-    scope: extension.scope ?? ExtensionScope.DATASOURCE,
-    schema: extension.schema,
+    id: ds.id,
+    name: ds.name,
+    logo: normalizeIconPath(ds.icon, ds.id),
+    description: ds.description,
+    tags: [],
+    scope: ds.scope,
+    schema: ds.schema,
+    getDriver: async (instanceName: string, config: unknown) => {
+      const driver = pickDriver(drivers, config);
+      if (!driver) {
+        throw new Error(`No driver configured for datasource ${ds.id}`);
+      }
+      return loadDriverInstance(driver, instanceName);
+    },
   };
 }
 
-/**
- * Get all extension metadata (for listing page)
- */
-export async function getAllExtensionMetadata(): Promise<ExtensionMetadata[]> {
-  const allExtensions = await getAllExtensions();
-  return allExtensions.map((extension) => ({
-    id: extension.id,
-    name: extension.name,
-    logo: extension.logo,
-    description: extension.description,
-    tags: extension.tags,
-    scope: extension.scope ?? ExtensionScope.DATASOURCE,
-    schema: extension.schema,
-  }));
+export async function getAllExtensions(): Promise<DatasourceExtension[]> {
+  const datasources = await getDiscoveredDatasources();
+  const extensions = await Promise.all(
+    datasources.map((ds) => getExtension(ds.id)),
+  );
+  return extensions.filter(Boolean) as DatasourceExtension[];
 }
 
-// Lazy load extensions to avoid hoisting issues
-let extensionsLoaded = false;
+export async function getExtensionMetadata(
+  id: string,
+): Promise<ExtensionMetadata | undefined> {
+  const ds = await getDiscoveredDatasource(id);
+  if (!ds) return undefined;
+  return {
+    id: ds.id,
+    name: ds.name,
+    logo: normalizeIconPath(ds.icon, ds.id),
+    description: ds.description,
+    tags: [],
+    scope: ds.scope ?? ExtensionScope.DATASOURCE,
+    schema: ds.schema,
+  };
+}
 
-async function loadExtensions(): Promise<void> {
-  if (extensionsLoaded) return;
-
-  await Promise.all([
-    import('../../features/playground/src/factory/impl/pglite-playground'),
-  ]);
-
-  extensionsLoaded = true;
+export async function getAllExtensionMetadata(): Promise<ExtensionMetadata[]> {
+  const datasources = await getDiscoveredDatasources();
+  return datasources.map((ds) => ({
+    id: ds.id,
+    name: ds.name,
+    logo: normalizeIconPath(ds.icon, ds.id),
+    description: ds.description,
+    tags: [],
+    scope: ds.scope ?? ExtensionScope.DATASOURCE,
+    schema: ds.schema,
+  }));
 }

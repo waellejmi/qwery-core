@@ -14,6 +14,7 @@ import { useSwitchWorkspaceMode } from '~/lib/hooks/use-workspace-mode';
 import { WorkspaceModeEnum } from '@qwery/domain/enums';
 import { useWorkspace } from '~/lib/context/workspace-context';
 import { ProjectConversationHistory } from './project-conversation-history';
+import { ProjectBreadcrumb } from './project-breadcrumb';
 
 export function ProjectLayoutTopBar() {
   const { workspace } = useWorkspace();
@@ -34,6 +35,10 @@ export function ProjectLayoutTopBar() {
           {workspace.mode === WorkspaceModeEnum.SIMPLE ? null : (
             <SidebarTrigger className="lg:hidden" />
           )}
+          <ProjectBreadcrumb />
+        </div>
+        <div className="flex items-center space-x-4">
+          <ProjectConversationHistory />
           <WorkspaceModeSwitch
             onChange={handleSwitchWorkspaceMode}
             defaultMode={
@@ -42,9 +47,6 @@ export function ProjectLayoutTopBar() {
                 : 'simple'
             }
           />
-        </div>
-        <div className="flex items-center space-x-4">
-          <ProjectConversationHistory />
           <Button asChild size="icon" variant="ghost">
             <Link
               to="https://docs.qwery.run"

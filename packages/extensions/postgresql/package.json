@@ -1,0 +1,55 @@
+{
+  "name": "@qwery/extension-postgresql",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/extension.js",
+  "scripts": {
+    "lint": "echo \"no lint configured\"",
+    "test": "vitest run --coverage",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "contributes": {
+    "datasources": [
+      {
+        "id": "postgresql",
+        "name": "PostgreSQL",
+        "description": "Connect to PostgreSQL databases",
+        "icon": "media/postgresql.svg",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "connectionUrl": {
+              "type": "string",
+              "description": "PostgreSQL connection string (postgresql://user:pass@host:port/db)"
+            }
+          },
+          "required": [
+            "connectionUrl"
+          ]
+        },
+        "drivers": [
+          "postgresql.default"
+        ]
+      }
+    ],
+    "drivers": [
+      {
+        "id": "postgresql.default",
+        "name": "PostgreSQL (Node)",
+        "description": "Default Node runtime PostgreSQL driver",
+        "runtime": "node",
+        "entry": "./dist/driver.js"
+      }
+    ]
+  },
+  "dependencies": {
+    "@qwery/extensions-sdk": "workspace:*",
+    "pg": "^8.13.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.10",
+    "vitest": "^4.0.7"
+  }
+}

@@ -18,9 +18,9 @@ export class NotebookRunner {
   public async testConnection(datasource: Datasource): Promise<void> {
     const driver = await createDriverForDatasource(datasource);
     try {
-      await driver.testConnection();
+      await driver.testConnection(datasource.config ?? {});
     } finally {
-      driver.close();
+      await driver.close?.();
     }
   }
 
@@ -29,14 +29,17 @@ export class NotebookRunner {
     if (options.mode === 'sql') {
       const driver = await createDriverForDatasource(options.datasource);
       try {
-        const result = await driver.query(options.query);
+        const result = await driver.query(
+          options.query,
+          options.datasource.config ?? {},
+        );
         const rowCount =
-          result.stat.rowsRead ??
-          result.stat.rowsAffected ??
+          result.stat?.rowsRead ??
+          result.stat?.rowsAffected ??
           result.rows.length;
         return { sql: options.query, rows: result.rows, rowCount };
       } finally {
-        driver.close();
+        await driver.close?.();
       }
     }
 

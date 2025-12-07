@@ -1,4 +1,8 @@
-import type { SimpleSchema, Table, Column } from '@qwery/domain/entities';
+import type {
+  SimpleSchema,
+  SimpleTable,
+  SimpleColumn,
+} from '@qwery/domain/entities';
 
 export interface ExtractSchemaOptions {
   dbPath: string;
@@ -75,7 +79,7 @@ export const extractSchema = async (
       // by checking if they match common naming patterns (e.g., sheet_*, my_*, etc.)
       // For now, just return all filtered views and let the caller handle it
 
-      const tables: Table[] = [];
+      const tables: SimpleTable[] = [];
       for (const view of views) {
         const viewName = view.table_name.replace(/"/g, '""');
         const schemaReader = await conn.runAndReadAll(`DESCRIBE "${viewName}"`);
@@ -85,7 +89,7 @@ export const extractSchema = async (
           column_type: string;
         }>;
 
-        const columns: Column[] = schemaRows.map((row) => ({
+        const columns: SimpleColumn[] = schemaRows.map((row) => ({
           columnName: row.column_name,
           columnType: row.column_type,
         }));
@@ -113,12 +117,12 @@ export const extractSchema = async (
     }>;
 
     // Convert to SimpleSchema format
-    const columns: Column[] = schemaRows.map((row) => ({
+    const columns: SimpleColumn[] = schemaRows.map((row) => ({
       columnName: row.column_name,
       columnType: row.column_type,
     }));
 
-    const table: Table = {
+    const table: SimpleTable = {
       tableName: opts.viewName,
       columns,
     };

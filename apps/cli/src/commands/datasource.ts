@@ -81,9 +81,9 @@ export function registerDatasourceCommands(
           config,
         );
         try {
-          await driver.testConnection();
+          await driver.testConnection(config);
         } finally {
-          driver.close();
+          await driver.close?.();
         }
       }
 
@@ -172,9 +172,9 @@ export function registerDatasourceCommands(
       }
       const driver = await createDriverForDatasource(datasource);
       try {
-        await driver.testConnection();
+        await driver.testConnection(datasource.config ?? {});
       } finally {
-        driver.close();
+        await driver.close?.();
       }
       console.log(
         `Connection to ${datasource.name} (${datasource.datasource_provider}) succeeded.`,

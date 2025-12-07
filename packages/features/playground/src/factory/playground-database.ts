@@ -1,4 +1,4 @@
-import { DatasourceDriver } from '@qwery/extensions-sdk';
+import type { IDataSourceDriver } from '@qwery/extensions-sdk';
 
 /**
  * Abstract interface for playground database implementations
@@ -15,6 +15,10 @@ export interface PlaygroundDatabase {
   /**
    * Seed the database with sample/prefilled data
    * @param driver - The driver to use to seed the database
+   * @param config - The configuration for the driver
    */
-  seed(driver: DatasourceDriver): Promise<void>;
+  seed(
+    driver: IDataSourceDriver,
+    config: Record<string, unknown>,
+  ): Promise<void>;
 }

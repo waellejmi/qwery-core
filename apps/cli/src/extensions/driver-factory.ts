@@ -1,12 +1,12 @@
 import type { Datasource } from '@qwery/domain/entities';
-import type { DatasourceDriver } from '@qwery/extensions-sdk';
+import type { IDataSourceDriver } from '@qwery/extensions-sdk';
 import { getExtension } from '@qwery/extensions-sdk';
 
 export async function createDriverFromExtension(
   providerId: string,
   name: string,
   config: Record<string, unknown>,
-): Promise<DatasourceDriver> {
+): Promise<IDataSourceDriver> {
   const extension = await getExtension(providerId);
   if (!extension) {
     throw new Error(
@@ -19,7 +19,7 @@ export async function createDriverFromExtension(
 
 export async function createDriverForDatasource(
   datasource: Datasource,
-): Promise<DatasourceDriver> {
+): Promise<IDataSourceDriver> {
   const config =
     (datasource.config as Record<string, unknown> | undefined) ?? {};
   return createDriverFromExtension(

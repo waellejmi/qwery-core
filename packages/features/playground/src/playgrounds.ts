@@ -66,10 +66,11 @@ export class PlaygroundBuilder {
         `Driver not found for datasource ${datasource.datasource_provider}`,
       );
     }
-    await driver.connect();
 
-    await playgroundDatabase.seed(driver);
-    await driver.close();
+    await playgroundDatabase.seed(driver, datasource.config);
+    if (driver.close) {
+      await driver.close();
+    }
     return createdDatasource;
   }
 }

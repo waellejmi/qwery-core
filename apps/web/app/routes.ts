@@ -21,6 +21,8 @@ const apiRoutes = [
   route('api/projects', 'routes/api/project/get-all-projects.ts'),
   route('api/projects/:id', 'routes/api/project/project.ts'),
   route('api/datasources/:id?', 'routes/api/datasource/datasource.ts'),
+  route('api/driver/command', 'routes/api/driver/command.ts'),
+  route('api/extensions/registry', 'routes/api/extensions/registry.ts'),
   route('api/notebooks', 'routes/api/notebook/get-all-notebooks.ts'),
   route('api/notebooks/:id', 'routes/api/notebook/notebook.ts'),
   route(
@@ -50,10 +52,16 @@ const projectLayout = layout('routes/project/layout.tsx', [
   route('prj/:slug/ds', 'routes/project/datasources/index.tsx'),
   route('prj/:slug/ds/new', 'routes/project/datasources/sources.tsx'),
   route('prj/:slug/ds/:id/new', 'routes/project/datasources/new.tsx'),
-  route('ds/:slug', 'routes/project/datasources/view.tsx'),
   route('prj/:slug/playground', 'routes/project/playground.tsx'),
   route('prj/:slug/c', 'routes/project/conversation/index.tsx'),
   route('c/:slug', 'routes/project/conversation/conversation.tsx'),
+]);
+
+const datasourceLayout = layout('routes/datasource/layout.tsx', [
+  route('ds/:slug', 'routes/datasource/index.tsx'),
+  route('ds/:slug/tables', 'routes/datasource/tables.tsx'),
+  route('ds/:slug/schema', 'routes/datasource/schema.tsx'),
+  route('ds/:slug/settings', 'routes/datasource/settings.tsx'),
 ]);
 
 export default [
@@ -63,4 +71,5 @@ export default [
   organisationsLayout,
   orgRoutes,
   projectLayout,
+  datasourceLayout,
 ] satisfies RouteConfig;

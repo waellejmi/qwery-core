@@ -1,15 +1,24 @@
-import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import {
+  type KeyboardEvent,
+  startTransition,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { useNavigate, useParams } from 'react-router';
-import { useQueryClient } from '@tanstack/react-query';
 
 import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { v4 as uuidv4 } from 'uuid';
 
 import { Datasource, DatasourceKind } from '@qwery/domain/entities';
-import { FormRenderer, getExtension } from '@qwery/extensions-sdk';
+import { GetProjectBySlugService } from '@qwery/domain/services';
+import {
+  FormRenderer,
+  getDiscoveredDatasource,
+  getExtension,
+} from '@qwery/extensions-sdk';
 import { Button } from '@qwery/ui/button';
 import {
   Card,
@@ -24,10 +33,10 @@ import { Trans } from '@qwery/ui/trans';
 import pathsConfig from '~/config/paths.config';
 import { createPath } from '~/config/qwery.navigation.config';
 import { useWorkspace } from '~/lib/context/workspace-context';
+import { useCreateDatasource } from '~/lib/mutations/use-create-datasource';
 import { useTestConnection } from '~/lib/mutations/use-test-connection';
 import { generateRandomName } from '~/lib/names';
 import { useGetExtension } from '~/lib/queries/use-get-extension';
-import { getDatasourcesByProjectIdKey } from '~/lib/queries/use-get-datasources';
 
 import type { Route } from './+types/new';
 
@@ -54,7 +63,6 @@ export default function DatasourcesPage({ loaderData }: Route.ComponentProps) {
   const params = useParams();
   const project_id = params.slug as string;
   const { t } = useTranslation('datasources');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formValues, setFormValues] = useState<Record<string, unknown> | null>(
     null,
   );
@@ -65,11 +73,11 @@ export default function DatasourcesPage({ loaderData }: Route.ComponentProps) {
   const [isHoveringName, setIsHoveringName] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const { repositories, workspace } = useWorkspace();
-  const queryClient = useQueryClient();
   const datasourceRepository = repositories.datasource;
   const projectRepository = repositories.project;
 
   const extension = useGetExtension(extensionId);
+  const [isFormValid, setIsFormValid] = useState(false);
 
   const testConnectionMutation = useTestConnection(
     (result) => {
@@ -92,10 +100,32 @@ export default function DatasourcesPage({ loaderData }: Route.ComponentProps) {
     },
   );
 
+  const createDatasourceMutation = useCreateDatasource(
+    datasourceRepository,
+    (_datasource) => {
+      toast.success(<Trans i18nKey="datasources:saveSuccess" />);
+      navigate(createPath(pathsConfig.app.projectDatasources, project_id), {
+        replace: true,
+      });
+    },
+    (error) => {
+      const errorMessage =
+        error instanceof Error ? (
+          error.message
+        ) : (
+          <Trans i18nKey="datasources:saveFailed" />
+        );
+      toast.error(errorMessage);
+      console.error(error);
+    },
+  );
+
   // Reset form values and generate new name when extension changes
   useEffect(() => {
-    setFormValues(null);
-    setDatasourceName(generateRandomName());
+    startTransition(() => {
+      setFormValues(null);
+      setDatasourceName(generateRandomName());
+    });
   }, [extensionId]);
 
   // Focus input when editing starts
@@ -142,71 +172,58 @@ export default function DatasourcesPage({ loaderData }: Route.ComponentProps) {
   }
 
   const handleSubmit = async (values: unknown) => {
-    setIsSubmitting(true);
-    try {
-      if (!extension) {
-        toast.error(<Trans i18nKey="datasources:notFoundError" />);
-        return;
-      }
-
-      const config = values as Record<string, unknown>;
-
-      // Generate UUID for datasource ID
-      const datasourceId = uuidv4();
-
-      let projectId = workspace.projectId;
-      if (!projectId) {
-        const projectRecord = await projectRepository.findBySlug(project_id);
-        projectId = projectRecord?.id;
-      }
-
-      if (!projectId) {
-        toast.error('Unable to resolve project context for datasource');
-        return;
-      }
-      const userId = 'system'; // Default user - replace with actual user context
-
-      // Create datasource object
-      const datasource: Datasource = {
-        id: datasourceId,
-        projectId,
-        name: datasourceName.trim() || generateRandomName(),
-        description: extension.data?.description || '',
-        datasource_provider: extension.data?.id || '',
-        datasource_driver: extension.data?.id || '',
-        datasource_kind: DatasourceKind.EMBEDDED,
-        slug: '',
-        config,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        createdBy: userId,
-        updatedBy: userId,
-      };
-
-      // Save and refetch datasources list
-      await datasourceRepository.create(datasource);
-      await queryClient.invalidateQueries({
-        queryKey: getDatasourcesByProjectIdKey(projectId),
-      });
-
-      toast.success(<Trans i18nKey="datasources:saveSuccess" />);
-
-      // Navigate back to datasources list
-      navigate(createPath(pathsConfig.app.projectDatasources, project_id), {
-        replace: true,
-      });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? (
-          error.message
-        ) : (
-          <Trans i18nKey="datasources:saveFailed" />
-        );
-      toast.error(errorMessage);
-      console.error(error);
-    } finally {
-      setIsSubmitting(false);
+    if (!extension?.data) {
+      toast.error(<Trans i18nKey="datasources:notFoundError" />);
+      return;
     }
+
+    const config = values as Record<string, unknown>;
+
+    let projectId = workspace.projectId;
+    if (!projectId) {
+      const getProjectBySlugService = new GetProjectBySlugService(
+        projectRepository,
+      );
+      try {
+        const project = await getProjectBySlugService.execute(project_id);
+        projectId = project.id;
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : 'Unable to resolve project context for datasource',
+        );
+        return;
+      }
+    }
+
+    if (!projectId) {
+      toast.error('Unable to resolve project context for datasource');
+      return;
+    }
+
+    const userId = 'system'; // Default user - replace with actual user context
+
+    // Infer datasource_kind from extension driver runtime
+    const dsMeta = await getDiscoveredDatasource(extension.data.id);
+    const driver =
+      dsMeta?.drivers.find(
+        (d) => d.id === (config as { driverId?: string })?.driverId,
+      ) ?? dsMeta?.drivers[0];
+    const runtime = driver?.runtime ?? 'browser';
+    const datasourceKind =
+      runtime === 'browser' ? DatasourceKind.EMBEDDED : DatasourceKind.REMOTE;
+
+    createDatasourceMutation.mutate({
+      projectId,
+      name: datasourceName.trim() || generateRandomName(),
+      description: extension.data.description || '',
+      datasource_provider: extension.data.id || '',
+      datasource_driver: extension.data.id || '',
+      datasource_kind: datasourceKind as string,
+      config,
+      createdBy: userId,
+    });
   };
 
   const handleTestConnection = () => {
@@ -299,6 +316,7 @@ export default function DatasourcesPage({ loaderData }: Route.ComponentProps) {
               onSubmit={handleSubmit}
               formId="datasource-form"
               onFormReady={setFormValues}
+              onValidityChange={setIsFormValid}
             />
           )}
           <div className="mt-6 flex items-center justify-between">
@@ -306,7 +324,10 @@ export default function DatasourcesPage({ loaderData }: Route.ComponentProps) {
               variant="outline"
               onClick={handleTestConnection}
               disabled={
-                testConnectionMutation.isPending || isSubmitting || !formValues
+                testConnectionMutation.isPending ||
+                createDatasourceMutation.isPending ||
+                !formValues ||
+                !isFormValid
               }
             >
               {testConnectionMutation.isPending ? (
@@ -323,16 +344,23 @@ export default function DatasourcesPage({ loaderData }: Route.ComponentProps) {
                     createPath(pathsConfig.app.projectDatasources, project_id),
                   )
                 }
-                disabled={isSubmitting || testConnectionMutation.isPending}
+                disabled={
+                  createDatasourceMutation.isPending ||
+                  testConnectionMutation.isPending
+                }
               >
                 <Trans i18nKey="datasources:cancel" />
               </Button>
               <Button
                 type="submit"
                 form="datasource-form"
-                disabled={isSubmitting || testConnectionMutation.isPending}
+                disabled={
+                  createDatasourceMutation.isPending ||
+                  testConnectionMutation.isPending ||
+                  !isFormValid
+                }
               >
-                {isSubmitting ? (
+                {createDatasourceMutation.isPending ? (
                   <Trans i18nKey="datasources:connecting" />
                 ) : (
                   <Trans i18nKey="datasources:connect" />

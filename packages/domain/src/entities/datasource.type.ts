@@ -1,7 +1,8 @@
 import { Entity } from '../common/entity';
 import { z } from 'zod';
 import { Exclude, Expose, plainToClass } from 'class-transformer';
-import { UpdateDatasourceInput } from '../usecases';
+import { generateIdentity } from '../utils/identity.generator';
+import { CreateDatasourceInput, UpdateDatasourceInput } from '../usecases';
 
 export enum DatasourceKind {
   EMBEDDED = 'embedded',
@@ -68,6 +69,28 @@ export class DatasourceEntity extends Entity<string, typeof DatasourceSchema> {
   public createdBy!: string;
   @Expose()
   public updatedBy!: string;
+
+  public static create(newDatasource: CreateDatasourceInput): DatasourceEntity {
+    const { id, slug } = generateIdentity();
+    const now = new Date();
+    const datasource: Datasource = {
+      id,
+      projectId: newDatasource.projectId,
+      name: newDatasource.name,
+      slug,
+      description: newDatasource.description || '',
+      datasource_provider: newDatasource.datasource_provider,
+      datasource_driver: newDatasource.datasource_driver,
+      datasource_kind: newDatasource.datasource_kind as DatasourceKind,
+      config: newDatasource.config || {},
+      createdAt: now,
+      updatedAt: now,
+      createdBy: newDatasource.createdBy,
+      updatedBy: newDatasource.createdBy,
+    };
+
+    return plainToClass(DatasourceEntity, DatasourceSchema.parse(datasource));
+  }
 
   public static update(
     datasource: Datasource,

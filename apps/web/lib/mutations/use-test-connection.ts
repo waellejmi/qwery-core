@@ -1,8 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { DatasourceKind } from '@qwery/domain/entities';
 import { Datasource } from '@qwery/domain/entities';
-import { getExtension } from '@qwery/extensions-sdk';
+import { getDiscoveredDatasource, getExtension } from '@qwery/extensions-sdk';
 
 type TestConnectionResult = {
   success: boolean;
@@ -19,7 +18,15 @@ export function useTestConnection(
 ) {
   return useMutation({
     mutationFn: async (payload: Datasource) => {
-      if (payload.datasource_kind === DatasourceKind.EMBEDDED) {
+      const dsMeta = await getDiscoveredDatasource(payload.datasource_provider);
+      const driver =
+        dsMeta?.drivers.find(
+          (d) => d.id === (payload.config as { driverId?: string })?.driverId,
+        ) ?? dsMeta?.drivers[0];
+
+      const runtime = driver?.runtime ?? 'browser';
+
+      if (runtime === 'browser') {
         const extension = await getExtension(payload.datasource_provider);
         if (!extension) {
           throw new Error('Extension not found');
@@ -30,42 +37,44 @@ export function useTestConnection(
           payload.slug ??
           payload.name ??
           'embedded-datasource';
-        const driver = await extension.getDriver(
+        const instance = await extension.getDriver(
           driverStorageKey,
           payload.config,
         );
-        if (!driver) {
+        if (!instance) {
           throw new Error('Driver not found');
         }
-        const result = await driver.testConnection();
-        if (!result) {
-          throw new Error('Failed to test connection');
-        }
+        await instance.testConnection(payload.config);
         return {
           success: true,
           data: {
-            connected: result,
+            connected: true,
             message: 'Connection successful',
           },
         };
-      } else {
-        const response = await fetch('/api/test-connection', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-          const error = await response
-            .json()
-            .catch(() => ({ error: 'Failed to test connection' }));
-          throw new Error(error.error || 'Failed to test connection');
-        }
-
-        return response.json();
       }
+
+      const response = await fetch('/api/driver/command', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'testConnection',
+          datasourceProvider: payload.datasource_provider,
+          driverId: driver?.id,
+          config: payload.config,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response
+          .json()
+          .catch(() => ({ error: 'Failed to test connection' }));
+        throw new Error(error.error || 'Failed to test connection');
+      }
+
+      return response.json();
     },
     onSuccess,
     onError,

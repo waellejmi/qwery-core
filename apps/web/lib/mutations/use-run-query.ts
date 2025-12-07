@@ -56,8 +56,17 @@ export function useRunQuery(
         throw new Error('Driver not found');
       }
 
-      const result = await driver.query(query);
-      return result as DatasourceResultSet;
+      const result = await driver.query(query, datasource.config);
+      return {
+        rows: result.rows,
+        headers: result.columns,
+        stat: result.stat ?? {
+          rowsAffected: 0,
+          rowsRead: result.rows.length,
+          rowsWritten: 0,
+          queryDurationMs: null,
+        },
+      };
     },
     onSuccess: (result, variables) => {
       onSuccess(result, variables.cellId);

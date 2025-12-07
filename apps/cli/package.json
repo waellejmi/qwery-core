@@ -37,7 +37,7 @@
     "commander": "^13.1.0",
     "dotenv": "^16.4.7",
     "nanoid": "^5.1.6",
-    "pg": "^8.13.0",
+    "pg": "^8.13.1",
     "react": "catalog:",
     "react-dom": "catalog:",
     "uuid": "^11.0.3",

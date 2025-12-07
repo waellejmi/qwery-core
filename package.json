@@ -54,6 +54,7 @@
     "desktop:build": "pnpm --filter desktop build",
     "desktop:package": "pnpm --filter desktop package",
     "desktop:start": "pnpm --filter desktop start",
+    "extensions:build": "node tooling/extensions/build.js",
     "update": "pnpm update -r",
     "syncpack:list": "pnpm dlx syncpack list-mismatches",
     "syncpack:fix": "pnpm dlx syncpack fix-mismatches",

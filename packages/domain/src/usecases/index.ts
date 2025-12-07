@@ -23,6 +23,7 @@ export * from './organization/get-organization.usecase';
 export * from './organization/get-organizations.usecase';
 
 export * from './dto/index';
+export * from './datasources/create-datasource.usecase';
 export * from './datasources/get-datasource.usecase';
 export * from './datasources/get-datasources-by-project-id.usecase';
 export * from './datasources/update-datasource.usecase';

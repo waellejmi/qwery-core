@@ -5,10 +5,7 @@ import { mergeConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 const config: StorybookConfig = {
-  stories: [
-    '../../../packages/**/*.stories.@(js|jsx|ts|tsx|mdx)',
-    '../../../apps/**/*.stories.@(js|jsx|ts|tsx|mdx)',
-  ],
+  stories: ['../../../packages/ui/src/**/*.stories.@(js|jsx|ts|tsx|mdx)'],
   addons: [
     '@storybook/addon-links',
     '@storybook/addon-essentials',

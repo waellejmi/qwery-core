@@ -51,6 +51,12 @@ type Pages = {
       "id"?: string;
     };
   };
+  "/api/driver/command": {
+    params: {};
+  };
+  "/api/extensions/registry": {
+    params: {};
+  };
   "/api/notebooks": {
     params: {};
   };
@@ -107,11 +113,6 @@ type Pages = {
       "id": string;
     };
   };
-  "/ds/:slug": {
-    params: {
-      "slug": string;
-    };
-  };
   "/prj/:slug/playground": {
     params: {
       "slug": string;
@@ -127,12 +128,32 @@ type Pages = {
       "slug": string;
     };
   };
+  "/ds/:slug": {
+    params: {
+      "slug": string;
+    };
+  };
+  "/ds/:slug/tables": {
+    params: {
+      "slug": string;
+    };
+  };
+  "/ds/:slug/schema": {
+    params: {
+      "slug": string;
+    };
+  };
+  "/ds/:slug/settings": {
+    params: {
+      "slug": string;
+    };
+  };
 };
 
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/version" | "/healthcheck" | "/qwery/*" | "/api/chat/:slug" | "/api/organizations" | "/api/organizations/:id" | "/api/projects" | "/api/projects/:id" | "/api/datasources/:id?" | "/api/notebooks" | "/api/notebooks/:id" | "/api/conversations" | "/api/conversations/:id" | "/api/messages" | "/api/usage" | "/organizations" | "/org/:slug" | "/prj/:slug" | "/notebook/:slug" | "/prj/:slug/ds" | "/prj/:slug/ds/new" | "/prj/:slug/ds/:id/new" | "/ds/:slug" | "/prj/:slug/playground" | "/prj/:slug/c" | "/c/:slug";
+    page: "/" | "/version" | "/healthcheck" | "/qwery/*" | "/api/chat/:slug" | "/api/organizations" | "/api/organizations/:id" | "/api/projects" | "/api/projects/:id" | "/api/datasources/:id?" | "/api/driver/command" | "/api/extensions/registry" | "/api/notebooks" | "/api/notebooks/:id" | "/api/conversations" | "/api/conversations/:id" | "/api/messages" | "/api/usage" | "/organizations" | "/org/:slug" | "/prj/:slug" | "/notebook/:slug" | "/prj/:slug/ds" | "/prj/:slug/ds/new" | "/prj/:slug/ds/:id/new" | "/prj/:slug/playground" | "/prj/:slug/c" | "/c/:slug" | "/ds/:slug" | "/ds/:slug/tables" | "/ds/:slug/schema" | "/ds/:slug/settings";
   };
   "routes/version.ts": {
     id: "routes/version";
@@ -169,6 +190,14 @@ type RouteFiles = {
   "routes/api/datasource/datasource.ts": {
     id: "routes/api/datasource/datasource";
     page: "/api/datasources/:id?";
+  };
+  "routes/api/driver/command.ts": {
+    id: "routes/api/driver/command";
+    page: "/api/driver/command";
+  };
+  "routes/api/extensions/registry.ts": {
+    id: "routes/api/extensions/registry";
+    page: "/api/extensions/registry";
   };
   "routes/api/notebook/get-all-notebooks.ts": {
     id: "routes/api/notebook/get-all-notebooks";
@@ -220,7 +249,7 @@ type RouteFiles = {
   };
   "routes/project/layout.tsx": {
     id: "routes/project/layout";
-    page: "/prj/:slug" | "/notebook/:slug" | "/prj/:slug/ds" | "/prj/:slug/ds/new" | "/prj/:slug/ds/:id/new" | "/ds/:slug" | "/prj/:slug/playground" | "/prj/:slug/c" | "/c/:slug";
+    page: "/prj/:slug" | "/notebook/:slug" | "/prj/:slug/ds" | "/prj/:slug/ds/new" | "/prj/:slug/ds/:id/new" | "/prj/:slug/playground" | "/prj/:slug/c" | "/c/:slug";
   };
   "routes/project/index.tsx": {
     id: "routes/project/index";
@@ -242,10 +271,6 @@ type RouteFiles = {
     id: "routes/project/datasources/new";
     page: "/prj/:slug/ds/:id/new";
   };
-  "routes/project/datasources/view.tsx": {
-    id: "routes/project/datasources/view";
-    page: "/ds/:slug";
-  };
   "routes/project/playground.tsx": {
     id: "routes/project/playground";
     page: "/prj/:slug/playground";
@@ -257,6 +282,26 @@ type RouteFiles = {
   "routes/project/conversation/conversation.tsx": {
     id: "routes/project/conversation/conversation";
     page: "/c/:slug";
+  };
+  "routes/datasource/layout.tsx": {
+    id: "routes/datasource/layout";
+    page: "/ds/:slug" | "/ds/:slug/tables" | "/ds/:slug/schema" | "/ds/:slug/settings";
+  };
+  "routes/datasource/index.tsx": {
+    id: "routes/datasource/index";
+    page: "/ds/:slug";
+  };
+  "routes/datasource/tables.tsx": {
+    id: "routes/datasource/tables";
+    page: "/ds/:slug/tables";
+  };
+  "routes/datasource/schema.tsx": {
+    id: "routes/datasource/schema";
+    page: "/ds/:slug/schema";
+  };
+  "routes/datasource/settings.tsx": {
+    id: "routes/datasource/settings";
+    page: "/ds/:slug/settings";
   };
 };
 
@@ -271,6 +316,8 @@ type RouteModules = {
   "routes/api/project/get-all-projects": typeof import("./app/routes/api/project/get-all-projects.ts");
   "routes/api/project/project": typeof import("./app/routes/api/project/project.ts");
   "routes/api/datasource/datasource": typeof import("./app/routes/api/datasource/datasource.ts");
+  "routes/api/driver/command": typeof import("./app/routes/api/driver/command.ts");
+  "routes/api/extensions/registry": typeof import("./app/routes/api/extensions/registry.ts");
   "routes/api/notebook/get-all-notebooks": typeof import("./app/routes/api/notebook/get-all-notebooks.ts");
   "routes/api/notebook/notebook": typeof import("./app/routes/api/notebook/notebook.ts");
   "routes/api/conversation/get-all-conversations": typeof import("./app/routes/api/conversation/get-all-conversations.ts");
@@ -289,8 +336,12 @@ type RouteModules = {
   "routes/project/datasources/index": typeof import("./app/routes/project/datasources/index.tsx");
   "routes/project/datasources/sources": typeof import("./app/routes/project/datasources/sources.tsx");
   "routes/project/datasources/new": typeof import("./app/routes/project/datasources/new.tsx");
-  "routes/project/datasources/view": typeof import("./app/routes/project/datasources/view.tsx");
   "routes/project/playground": typeof import("./app/routes/project/playground.tsx");
   "routes/project/conversation/index": typeof import("./app/routes/project/conversation/index.tsx");
   "routes/project/conversation/conversation": typeof import("./app/routes/project/conversation/conversation.tsx");
+  "routes/datasource/layout": typeof import("./app/routes/datasource/layout.tsx");
+  "routes/datasource/index": typeof import("./app/routes/datasource/index.tsx");
+  "routes/datasource/tables": typeof import("./app/routes/datasource/tables.tsx");
+  "routes/datasource/schema": typeof import("./app/routes/datasource/schema.tsx");
+  "routes/datasource/settings": typeof import("./app/routes/datasource/settings.tsx");
 };

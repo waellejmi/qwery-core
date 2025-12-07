@@ -477,7 +477,7 @@ export function inferDomain(schemas: SimpleSchema[]): {
         allColumns.push(name);
 
         // Extract patterns (words, stems)
-        const words = name.split(/[_\s-]/).filter((w) => w.length > 2);
+        const words = name.split(/[_\s-]/).filter((w: string) => w.length > 2);
         for (const word of words) {
           const count = columnPatterns.get(word) || 0;
           columnPatterns.set(word, count + 1);

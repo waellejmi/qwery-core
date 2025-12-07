@@ -20,6 +20,8 @@
       "routes/api/project/get-all-projects": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/api/project/project": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/api/datasource/datasource": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api/driver/command": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api/extensions/registry": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/api/notebook/get-all-notebooks": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/api/notebook/notebook": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/api/conversation/get-all-conversations": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
@@ -34,10 +36,13 @@
       "routes/project/datasources/index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/project/datasources/sources": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/project/datasources/new": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
-      "routes/project/datasources/view": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/project/playground": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/project/conversation/index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
-      "routes/project/conversation/conversation": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0"
+      "routes/project/conversation/conversation": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/datasource/index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/datasource/tables": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/datasource/schema": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/datasource/settings": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0"
     },
     "routes": {
       "root": {
@@ -109,6 +114,20 @@
         "parentId": "root",
         "file": "app/routes/api/datasource/datasource.ts",
         "path": "api/datasources/:id?",
+        "config": {}
+      },
+      "routes/api/driver/command": {
+        "id": "routes/api/driver/command",
+        "parentId": "root",
+        "file": "app/routes/api/driver/command.ts",
+        "path": "api/driver/command",
+        "config": {}
+      },
+      "routes/api/extensions/registry": {
+        "id": "routes/api/extensions/registry",
+        "parentId": "root",
+        "file": "app/routes/api/extensions/registry.ts",
+        "path": "api/extensions/registry",
         "config": {}
       },
       "routes/api/notebook/get-all-notebooks": {
@@ -233,13 +252,6 @@
         "path": "prj/:slug/ds/:id/new",
         "config": {}
       },
-      "routes/project/datasources/view": {
-        "id": "routes/project/datasources/view",
-        "parentId": "routes/project/layout",
-        "file": "app/routes/project/datasources/view.tsx",
-        "path": "ds/:slug",
-        "config": {}
-      },
       "routes/project/playground": {
         "id": "routes/project/playground",
         "parentId": "routes/project/layout",
@@ -259,6 +271,40 @@
         "parentId": "routes/project/layout",
         "file": "app/routes/project/conversation/conversation.tsx",
         "path": "c/:slug",
+        "config": {}
+      },
+      "routes/datasource/layout": {
+        "id": "routes/datasource/layout",
+        "parentId": "root",
+        "file": "app/routes/datasource/layout.tsx",
+        "config": {}
+      },
+      "routes/datasource/index": {
+        "id": "routes/datasource/index",
+        "parentId": "routes/datasource/layout",
+        "file": "app/routes/datasource/index.tsx",
+        "path": "ds/:slug",
+        "config": {}
+      },
+      "routes/datasource/tables": {
+        "id": "routes/datasource/tables",
+        "parentId": "routes/datasource/layout",
+        "file": "app/routes/datasource/tables.tsx",
+        "path": "ds/:slug/tables",
+        "config": {}
+      },
+      "routes/datasource/schema": {
+        "id": "routes/datasource/schema",
+        "parentId": "routes/datasource/layout",
+        "file": "app/routes/datasource/schema.tsx",
+        "path": "ds/:slug/schema",
+        "config": {}
+      },
+      "routes/datasource/settings": {
+        "id": "routes/datasource/settings",
+        "parentId": "routes/datasource/layout",
+        "file": "app/routes/datasource/settings.tsx",
+        "path": "ds/:slug/settings",
         "config": {}
       }
     }
@@ -333,6 +379,18 @@
         "parentId": "root",
         "file": "routes/api/datasource/datasource.ts",
         "path": "api/datasources/:id?"
+      },
+      "routes/api/driver/command": {
+        "id": "routes/api/driver/command",
+        "parentId": "root",
+        "file": "routes/api/driver/command.ts",
+        "path": "api/driver/command"
+      },
+      "routes/api/extensions/registry": {
+        "id": "routes/api/extensions/registry",
+        "parentId": "root",
+        "file": "routes/api/extensions/registry.ts",
+        "path": "api/extensions/registry"
       },
       "routes/api/notebook/get-all-notebooks": {
         "id": "routes/api/notebook/get-all-notebooks",
@@ -438,12 +496,6 @@
         "file": "routes/project/datasources/new.tsx",
         "path": "prj/:slug/ds/:id/new"
       },
-      "routes/project/datasources/view": {
-        "id": "routes/project/datasources/view",
-        "parentId": "routes/project/layout",
-        "file": "routes/project/datasources/view.tsx",
-        "path": "ds/:slug"
-      },
       "routes/project/playground": {
         "id": "routes/project/playground",
         "parentId": "routes/project/layout",
@@ -461,6 +513,35 @@
         "parentId": "routes/project/layout",
         "file": "routes/project/conversation/conversation.tsx",
         "path": "c/:slug"
+      },
+      "routes/datasource/layout": {
+        "id": "routes/datasource/layout",
+        "parentId": "root",
+        "file": "routes/datasource/layout.tsx"
+      },
+      "routes/datasource/index": {
+        "id": "routes/datasource/index",
+        "parentId": "routes/datasource/layout",
+        "file": "routes/datasource/index.tsx",
+        "path": "ds/:slug"
+      },
+      "routes/datasource/tables": {
+        "id": "routes/datasource/tables",
+        "parentId": "routes/datasource/layout",
+        "file": "routes/datasource/tables.tsx",
+        "path": "ds/:slug/tables"
+      },
+      "routes/datasource/schema": {
+        "id": "routes/datasource/schema",
+        "parentId": "routes/datasource/layout",
+        "file": "routes/datasource/schema.tsx",
+        "path": "ds/:slug/schema"
+      },
+      "routes/datasource/settings": {
+        "id": "routes/datasource/settings",
+        "parentId": "routes/datasource/layout",
+        "file": "routes/datasource/settings.tsx",
+        "path": "ds/:slug/settings"
       }
     },
     "routeDiscovery": {
@@ -511,6 +592,14 @@
           {
             "file": "routes/api/datasource/datasource.ts",
             "path": "api/datasources/:id?"
+          },
+          {
+            "file": "routes/api/driver/command.ts",
+            "path": "api/driver/command"
+          },
+          {
+            "file": "routes/api/extensions/registry.ts",
+            "path": "api/extensions/registry"
           },
           {
             "file": "routes/api/notebook/get-all-notebooks.ts",
@@ -587,10 +676,6 @@
                 "path": "prj/:slug/ds/:id/new"
               },
               {
-                "file": "routes/project/datasources/view.tsx",
-                "path": "ds/:slug"
-              },
-              {
                 "file": "routes/project/playground.tsx",
                 "path": "prj/:slug/playground"
               },
@@ -601,6 +686,27 @@
               {
                 "file": "routes/project/conversation/conversation.tsx",
                 "path": "c/:slug"
+              }
+            ]
+          },
+          {
+            "file": "routes/datasource/layout.tsx",
+            "children": [
+              {
+                "file": "routes/datasource/index.tsx",
+                "path": "ds/:slug"
+              },
+              {
+                "file": "routes/datasource/tables.tsx",
+                "path": "ds/:slug/tables"
+              },
+              {
+                "file": "routes/datasource/schema.tsx",
+                "path": "ds/:slug/schema"
+              },
+              {
+                "file": "routes/datasource/settings.tsx",
+                "path": "ds/:slug/settings"
               }
             ]
           }

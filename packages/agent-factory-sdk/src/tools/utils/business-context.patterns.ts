@@ -1,4 +1,4 @@
-import type { SimpleSchema } from '@qwery/domain/entities';
+import type { SimpleSchema, SimpleColumn } from '@qwery/domain/entities';
 import type { DataPatterns } from '../types/business-context.types';
 
 /**
@@ -41,7 +41,7 @@ export async function extractDataPatterns(
       // Analyze each column
       for (const columnName of columnNames) {
         const column = schema.tables[0]?.columns.find(
-          (c) => c.columnName === columnName,
+          (c: SimpleColumn) => c.columnName === columnName,
         );
         if (!column) continue;
 

@@ -1,5 +1,5 @@
 import { fromPromise } from 'xstate/actors';
-import type { SimpleSchema } from '@qwery/domain/entities';
+import type { SimpleSchema, SimpleTable } from '@qwery/domain/entities';
 import type { BusinessContext } from '../../tools/types/business-context.types';
 import {
   loadBusinessContext,
@@ -52,7 +52,7 @@ async function enhanceBusinessContextFunction(
   const filteredSchema = {
     ...input.schema,
     tables: input.schema.tables.filter(
-      (t) => !isSystemOrTempTable(t.tableName),
+      (t: SimpleTable) => !isSystemOrTempTable(t.tableName),
     ),
   };
 

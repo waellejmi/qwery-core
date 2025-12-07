@@ -1,0 +1,52 @@
+{
+  "name": "@qwery/extension-pglite",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/extension.js",
+  "scripts": {
+    "lint": "echo \"no lint configured\"",
+    "test": "vitest run --coverage",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "contributes": {
+    "datasources": [
+      {
+        "id": "pglite",
+        "name": "Embedded PostgreSQL",
+        "description": "Test PostgreSQL queries in your browser using PGlite",
+        "icon": "media/pglite.svg",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "database": {
+              "type": "string",
+              "description": "Database name",
+              "default": "playground"
+            }
+          }
+        },
+        "drivers": [
+          "pglite.default"
+        ]
+      }
+    ],
+    "drivers": [
+      {
+        "id": "pglite.default",
+        "name": "PGlite (Browser)",
+        "description": "Browser runtime PGlite driver",
+        "runtime": "browser",
+        "entry": "./dist/driver.js"
+      }
+    ]
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.3.12",
+    "@qwery/extensions-sdk": "workspace:*",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.7"
+  }
+}

@@ -53,3 +53,10 @@ pnpm typecheck
 - Add `data-test` for E2E tests where appropriate
 - `useEffect` is a code smell and must be justified - avoid if possible
 - Do not write many separate `useState`, prefer single state object (unless required)
+
+
+## Tests
+
+- tests should be under <package_name>/__tests__
+- Use filename.test.ts naming convention to name test files
+- Use vitest and vitest istanbul for coverage

@@ -66,7 +66,15 @@
     "schemas": "Schemas",
     "project": "Project",
     "projectDashboard": "Dashboard",
-    "notebook": "Notebook"
+    "notebook": "Notebook",
+    "datasourceSchema": "Schema",
+    "datasourceTables": "Tables",
+    "datasourceSettings": "Settings",
+    "datasourceFunctions": "Functions",
+    "datasourceViews": "Views",
+    "datasourceIndexes": "Indexes",
+    "datasourceConstraints": "Constraints",
+    "datasourceTriggers": "Triggers"
   },
   "roles": {
     "owner": {
@@ -86,5 +94,21 @@
     "button": "Refer",
     "dialogTitle": "Want to empower your friends with the best Qwery Tool?",
     "dialogDescription": "Earn $5 in credits when friends sign up and $10 in crédits if they upgrade to a paying plan."
+  },
+  "breadcrumb": {
+    "searchOrgs": "Search organizations...",
+    "searchProjects": "Search projects...",
+    "searchDatasources": "Search datasources...",
+    "searchNotebooks": "Search notebooks...",
+    "viewAllOrgs": "View all organizations",
+    "viewAllProjects": "View all projects",
+    "viewAllDatasources": "View all datasources",
+    "viewAllNotebooks": "View all notebooks",
+    "newOrg": "New Organization",
+    "newProject": "New Project",
+    "newDatasource": "New Datasource",
+    "newNotebook": "New Notebook",
+    "noResults": "No results found",
+    "loading": "Loading..."
   }
 }

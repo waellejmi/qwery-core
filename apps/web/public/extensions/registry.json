@@ -1,0 +1,57 @@
+{
+  "datasources": [
+    {
+      "id": "pglite",
+      "name": "Embedded PostgreSQL",
+      "description": "Test PostgreSQL queries in your browser using PGlite",
+      "icon": "/extensions/pglite/pglite.svg",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "database": {
+            "type": "string",
+            "description": "Database name",
+            "default": "playground"
+          }
+        }
+      },
+      "packageName": "@qwery/extension-pglite",
+      "drivers": [
+        {
+          "id": "pglite.default",
+          "name": "PGlite (Browser)",
+          "description": "Browser runtime PGlite driver",
+          "runtime": "browser",
+          "entry": "driver.js"
+        }
+      ]
+    },
+    {
+      "id": "postgresql",
+      "name": "PostgreSQL",
+      "description": "Connect to PostgreSQL databases",
+      "icon": "/extensions/postgresql/postgresql.svg",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "connectionUrl": {
+            "type": "string",
+            "description": "PostgreSQL connection string (postgresql://user:pass@host:port/db)"
+          }
+        },
+        "required": [
+          "connectionUrl"
+        ]
+      },
+      "packageName": "@qwery/extension-postgresql",
+      "drivers": [
+        {
+          "id": "postgresql.default",
+          "name": "PostgreSQL (Node)",
+          "description": "Default Node runtime PostgreSQL driver",
+          "runtime": "node"
+        }
+      ]
+    }
+  ]
+}

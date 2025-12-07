@@ -153,6 +153,7 @@
     "./agent-ui": "./src/qwery/agent-ui.tsx",
     "./ai-elements": "./src/ai-elements/index.ts",
     "./workspace-mode-switch": "./src/qwery/workspace-mode-switch.tsx",
+    "./qwery-breadcrumb": "./src/qwery/qwery-breadcrumb.tsx",
     "./ai": "./src/qwery/ai/index.ts"
   },
   "typesVersions": {

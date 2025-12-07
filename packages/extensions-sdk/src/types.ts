@@ -1,6 +1,11 @@
 import type { z } from 'zod';
 
-import type { DatasourceDriver } from './datasource.driver';
+import type {
+  DatasourceHeader,
+  DatasourceResultStat,
+  DatasourceRow,
+} from './model/resultset.type';
+import type { DatasourceMetadata } from './metadata';
 
 /**
  * Datasource plugin interface
@@ -52,7 +57,7 @@ export interface DatasourceExtension<T extends z.ZodTypeAny = z.ZodTypeAny> {
    * @param config - The configuration for the extension
    * @returns The driver for the extension
    */
-  getDriver: (name: string, config: z.infer<T>) => Promise<DatasourceDriver>;
+  getDriver: (name: string, config: z.infer<T>) => Promise<IDataSourceDriver>;
 }
 
 export enum ExtensionScope {
@@ -71,4 +76,60 @@ export interface ExtensionMetadata {
   tags?: string[];
   scope: ExtensionScope;
   schema: z.ZodTypeAny;
+}
+
+// v0 driver/runtime contracts
+export type DriverRuntime = 'node' | 'browser';
+
+export interface Disposable {
+  dispose(): void;
+}
+
+export interface ExtensionContext {
+  subscriptions: Disposable[];
+}
+
+export interface SecureStore {
+  get(key: string): Promise<string | undefined>;
+  set(key: string, value: string): Promise<void>;
+  delete(key: string): Promise<void>;
+}
+
+export interface Logger {
+  debug(...args: unknown[]): void;
+  info(...args: unknown[]): void;
+  warn(...args: unknown[]): void;
+  error(...args: unknown[]): void;
+}
+
+export interface DriverContext {
+  logger?: Logger;
+  secrets?: SecureStore;
+  abortSignal?: AbortSignal;
+  runtime?: DriverRuntime;
+}
+
+export interface QueryResult {
+  columns: DatasourceHeader[];
+  rows: DatasourceRow[];
+  stat?: DatasourceResultStat;
+  lastInsertRowid?: number;
+}
+
+// Alias for backward compatibility
+export type QueryColumn = DatasourceHeader;
+
+export interface IDataSourceDriver {
+  testConnection(config: unknown): Promise<void>;
+  query(sql: string, config: unknown): Promise<QueryResult>;
+  metadata(config: unknown): Promise<DatasourceMetadata>;
+  close?(): Promise<void>;
+}
+
+export type DriverFactory = (context: DriverContext) => IDataSourceDriver;
+
+export interface DatasourceDriverRegistration {
+  id: string;
+  factory: DriverFactory;
+  runtime?: DriverRuntime;
 }

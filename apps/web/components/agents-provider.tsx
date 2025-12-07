@@ -68,7 +68,16 @@ export function AgentsProvider({
         throw new Error('Driver not found');
       }
 
-      const schema = await driver.getCurrentSchema();
+      const metadata = await driver.metadata(datasource.config);
+      const schema = metadata.tables
+        .map(
+          (table) =>
+            `${table.schema}.${table.name} (${metadata.columns
+              .filter((col) => col.table_id === table.id)
+              .map((col) => `${col.name} ${col.data_type}`)
+              .join(', ')})`,
+        )
+        .join('\n');
 
       const _prompt = `You are a SQL query assistant. 
       The user wants to run a query: "${query}" on datasource: "${datasource.datasource_provider}". 

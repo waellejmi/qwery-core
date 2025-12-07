@@ -4,7 +4,11 @@ import * as React from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import type { FieldPath, FieldValues } from 'react-hook-form';
+import type {
+  ControllerRenderProps,
+  FieldPath,
+  FieldValues,
+} from 'react-hook-form';
 import type { z } from 'zod';
 
 import { FieldGroup } from '@qwery/ui/field';
@@ -36,6 +40,7 @@ interface FormRendererProps<T extends ZodSchemaType> {
   defaultValues?: Partial<z.infer<T>>;
   formId?: string;
   onFormReady?: (values: z.infer<T>) => void;
+  onValidityChange?: (isValid: boolean) => void;
 }
 
 /**
@@ -285,7 +290,11 @@ function renderField(
       <FormField
         key={path}
         name={path as FieldPath<FieldValues>}
-        render={({ field }) => (
+        render={({
+          field,
+        }: {
+          field: ControllerRenderProps<FieldValues, FieldPath<FieldValues>>;
+        }) => (
           <FormItem>
             <FormLabel>{name}</FormLabel>
             <FormControl>
@@ -309,7 +318,11 @@ function renderField(
       <FormField
         key={path}
         name={path as FieldPath<FieldValues>}
-        render={({ field }) => (
+        render={({
+          field,
+        }: {
+          field: ControllerRenderProps<FieldValues, FieldPath<FieldValues>>;
+        }) => (
           <FormItem>
             <FormLabel>{name}</FormLabel>
             <FormControl>
@@ -317,7 +330,7 @@ function renderField(
                 {...field}
                 type="number"
                 placeholder={placeholder}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const value = e.target.value;
                   field.onChange(value === '' ? undefined : Number(value));
                 }}
@@ -338,7 +351,11 @@ function renderField(
       <FormField
         key={path}
         name={path as FieldPath<FieldValues>}
-        render={({ field }) => (
+        render={({
+          field,
+        }: {
+          field: ControllerRenderProps<FieldValues, FieldPath<FieldValues>>;
+        }) => (
           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
             <div className="space-y-0.5">
               <FormLabel className="text-base">{name}</FormLabel>
@@ -361,7 +378,11 @@ function renderField(
       <FormField
         key={path}
         name={path as FieldPath<FieldValues>}
-        render={({ field }) => (
+        render={({
+          field,
+        }: {
+          field: ControllerRenderProps<FieldValues, FieldPath<FieldValues>>;
+        }) => (
           <FormItem>
             <FormLabel>{name}</FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -394,7 +415,11 @@ function renderField(
       <FormField
         key={path}
         name={path as FieldPath<FieldValues>}
-        render={({ field }) => (
+        render={({
+          field,
+        }: {
+          field: ControllerRenderProps<FieldValues, FieldPath<FieldValues>>;
+        }) => (
           <FormItem>
             <FormLabel>{name}</FormLabel>
             <FormControl>
@@ -436,7 +461,11 @@ function renderField(
       <FormField
         key={path}
         name={path as FieldPath<FieldValues>}
-        render={({ field }) => (
+        render={({
+          field,
+        }: {
+          field: ControllerRenderProps<FieldValues, FieldPath<FieldValues>>;
+        }) => (
           <FormItem>
             <FormLabel>{name}</FormLabel>
             <FormControl>
@@ -447,7 +476,7 @@ function renderField(
                     ? field.value.join(', ')
                     : field.value || ''
                 }
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
                   const value = e.target.value;
                   field.onChange(
                     value ? value.split(',').map((s) => s.trim()) : [],
@@ -471,7 +500,11 @@ function renderField(
       <FormField
         key={path}
         name={path as FieldPath<FieldValues>}
-        render={({ field }) => (
+        render={({
+          field,
+        }: {
+          field: ControllerRenderProps<FieldValues, FieldPath<FieldValues>>;
+        }) => (
           <FormItem>
             <FormLabel>{name}</FormLabel>
             <FormControl>
@@ -490,7 +523,11 @@ function renderField(
     <FormField
       key={path}
       name={path as FieldPath<FieldValues>}
-      render={({ field }) => (
+      render={({
+        field,
+      }: {
+        field: ControllerRenderProps<FieldValues, FieldPath<FieldValues>>;
+      }) => (
         <FormItem>
           <FormLabel>{name}</FormLabel>
           <FormControl>
@@ -513,6 +550,7 @@ export function FormRenderer<T extends ZodSchemaType>({
   defaultValues,
   formId,
   onFormReady,
+  onValidityChange,
 }: FormRendererProps<T>) {
   // Ensure schema is a valid Zod schema
   if (!schema || typeof schema.parse !== 'function') {
@@ -533,13 +571,17 @@ export function FormRenderer<T extends ZodSchemaType>({
   const form = useForm<z.infer<T>>({
     resolver: zodResolver(schema as z.ZodTypeAny),
     defaultValues: mergedDefaults,
+    mode: 'onChange',
+    reValidateMode: 'onChange',
   });
 
   // Watch all form values to detect changes
   const watchedValues = form.watch();
   const previousValuesRef = React.useRef<z.infer<T> | null>(null);
   const onFormReadyRef = React.useRef(onFormReady);
+  const onValidityChangeRef = React.useRef(onValidityChange);
   onFormReadyRef.current = onFormReady;
+  onValidityChangeRef.current = onValidityChange;
 
   // Expose current form values to parent when they actually change
   React.useEffect(() => {
@@ -568,6 +610,11 @@ export function FormRenderer<T extends ZodSchemaType>({
       }
     }
   }, [watchedValues, form, schema]);
+
+  React.useEffect(() => {
+    if (!onValidityChangeRef.current) return;
+    onValidityChangeRef.current(form.formState.isValid);
+  }, [form.formState.isValid]);
 
   const handleSubmit = form.handleSubmit(async (values) => {
     await onSubmit(values);

@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import type { SimpleSchema } from '@qwery/domain/entities';
+import type { SimpleSchema, SimpleColumn } from '@qwery/domain/entities';
 
 export interface ViewRecord {
   viewName: string; // Technical name (unique, sanitized)
@@ -199,7 +199,7 @@ export function generateSemanticViewName(
   let semanticName: string | null = null;
 
   // Strategy 1: Look for primary entity indicators (ID columns)
-  const idColumns = table.columns.filter((c) => {
+  const idColumns = table.columns.filter((c: SimpleColumn) => {
     const name = c.columnName.toLowerCase();
     return name.endsWith('_id') || name === 'id';
   });

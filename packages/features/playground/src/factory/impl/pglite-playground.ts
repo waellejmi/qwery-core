@@ -1,84 +1,35 @@
-import { PGlite } from '@electric-sql/pglite';
-import { z } from 'zod';
-
-import type { DatasourceExtension } from '@qwery/extensions-sdk';
-import {
-  type DatasourceDriver,
-  ExtensionScope,
-  registerExtension,
-} from '@qwery/extensions-sdk';
+import type { IDataSourceDriver } from '@qwery/extensions-sdk';
 
 import type { PlaygroundDatabase } from '../playground-database';
-import { PGliteDriver } from './pglite-driver';
-
-// Register the pglite plugin at module load
-const pgliteSchema = z.object({
-  host: z.string().default('localhost').describe('Database host'),
-  port: z.number().int().default(5432).describe('Database port'),
-  database: z.string().default('playground').describe('Database name'),
-  user: z.string().default('postgres').describe('Database user'),
-  password: z.string().default('postgres').describe('Database password'),
-  playground: z
-    .boolean()
-    .default(true)
-    .describe('Indicates this is a playground datasource'),
-  playgroundId: z.string().default('pglite').describe('Playground identifier'),
-});
-
-const pglitePlugin: DatasourceExtension<typeof pgliteSchema> = {
-  id: 'pglite',
-  name: 'Embedded PostgreSQL',
-  logo: '/images/datasources/postgresql_icon_big.png',
-  description: 'Test PostgreSQL queries in your browser using PGlite',
-  tags: ['SQL', 'Playground', 'Browser'],
-  scope: ExtensionScope.DATASOURCE,
-  schema: pgliteSchema,
-  getDriver: async (name: string, config: z.infer<typeof pgliteSchema>) => {
-    return new PGliteDriver(name, config);
-  },
-};
-
-registerExtension(pglitePlugin as unknown as DatasourceExtension);
 
 export class PGlitePlayground implements PlaygroundDatabase {
-  private db: PGlite | null = null;
-
   getConnectionConfig(): Record<string, unknown> {
     // PGlite runs in the browser, so we return a special config
     // that indicates this is a playground datasource
     return {
-      host: 'localhost',
-      port: 5432,
       database: 'playground',
-      user: 'postgres',
-      password: 'postgres',
-      playground: true,
-      playgroundId: 'pglite',
     };
   }
 
-  async seed(driver: DatasourceDriver): Promise<void> {
-    await driver.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        email VARCHAR(100) NOT NULL UNIQUE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
+  async seed(
+    driver: IDataSourceDriver,
+    config: Record<string, unknown>,
+  ): Promise<void> {
     // Create sample tables with prefilled data
-    // Execute each statement separately for better error handling
-    await driver.query(`
+    await driver.query(
+      `
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         email VARCHAR(100) NOT NULL UNIQUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `);
+    `,
+      config,
+    );
 
-    await driver.query(`
+    await driver.query(
+      `
       CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
         name VARCHAR(200) NOT NULL,
@@ -87,9 +38,12 @@ export class PGlitePlayground implements PlaygroundDatabase {
         stock INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `);
+    `,
+      config,
+    );
 
-    await driver.query(`
+    await driver.query(
+      `
       CREATE TABLE IF NOT EXISTS orders (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id),
@@ -97,31 +51,48 @@ export class PGlitePlayground implements PlaygroundDatabase {
         status VARCHAR(20) DEFAULT 'pending',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `);
+    `,
+      config,
+    );
 
     // Insert sample data - check if data already exists first
     const usersResult = await driver.query(
       'SELECT COUNT(*) as count FROM users',
+      config,
     );
-    const usersCount = (usersResult.rows[0] as { count: number })?.count ?? 0;
-    if (usersCount === 0) {
-      await driver.query(`
+    const usersCount =
+      (usersResult.rows[0] as { count: number | string })?.count ?? 0;
+    const usersCountNum =
+      typeof usersCount === 'string' ? parseInt(usersCount, 10) : usersCount;
+
+    if (usersCountNum === 0) {
+      await driver.query(
+        `
         INSERT INTO users (name, email) VALUES
           ('John Doe', 'john.doe@example.com'),
           ('Jane Smith', 'jane.smith@example.com'),
           ('Bob Johnson', 'bob.johnson@example.com'),
           ('Alice Williams', 'alice.williams@example.com'),
           ('Charlie Brown', 'charlie.brown@example.com')
-      `);
+      `,
+        config,
+      );
     }
 
     const productsResult = await driver.query(
       'SELECT COUNT(*) as count FROM products',
+      config,
     );
     const productsCount =
-      (productsResult.rows[0] as { count: number })?.count ?? 0;
-    if (productsCount === 0) {
-      await driver.query(`
+      (productsResult.rows[0] as { count: number | string })?.count ?? 0;
+    const productsCountNum =
+      typeof productsCount === 'string'
+        ? parseInt(productsCount, 10)
+        : productsCount;
+
+    if (productsCountNum === 0) {
+      await driver.query(
+        `
         INSERT INTO products (name, price, category, stock) VALUES
           ('Laptop', 999.99, 'Electronics', 15),
           ('Mouse', 29.99, 'Electronics', 50),
@@ -131,15 +102,23 @@ export class PGlitePlayground implements PlaygroundDatabase {
           ('Standing Desk', 399.99, 'Furniture', 5),
           ('Notebook', 9.99, 'Stationery', 100),
           ('Pen Set', 19.99, 'Stationery', 75)
-      `);
+      `,
+        config,
+      );
     }
 
     const ordersResult = await driver.query(
       'SELECT COUNT(*) as count FROM orders',
+      config,
     );
-    const ordersCount = (ordersResult.rows[0] as { count: number })?.count ?? 0;
-    if (ordersCount === 0) {
-      await driver.query(`
+    const ordersCount =
+      (ordersResult.rows[0] as { count: number | string })?.count ?? 0;
+    const ordersCountNum =
+      typeof ordersCount === 'string' ? parseInt(ordersCount, 10) : ordersCount;
+
+    if (ordersCountNum === 0) {
+      await driver.query(
+        `
         INSERT INTO orders (user_id, total, status) VALUES
           (1, 999.99, 'completed'),
           (1, 29.99, 'completed'),
@@ -149,7 +128,9 @@ export class PGlitePlayground implements PlaygroundDatabase {
           (4, 399.99, 'pending'),
           (5, 9.99, 'completed'),
           (5, 19.99, 'completed')
-      `);
+      `,
+        config,
+      );
     }
   }
 }

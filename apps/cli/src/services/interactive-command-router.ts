@@ -167,9 +167,9 @@ export class InteractiveCommandRouter {
             config,
           );
           try {
-            await driver.testConnection();
+            await driver.testConnection(config);
           } finally {
-            driver.close();
+            await driver.close?.();
           }
         }
 
@@ -261,7 +261,7 @@ export class InteractiveCommandRouter {
 
         const driver = await createDriverForDatasource(datasource);
         try {
-          await driver.testConnection();
+          await driver.testConnection(datasource.config ?? {});
           console.log(
             '\n' +
               successBox(
@@ -270,7 +270,7 @@ export class InteractiveCommandRouter {
               '\n',
           );
         } finally {
-          driver.close();
+          await driver.close?.();
         }
         break;
       }

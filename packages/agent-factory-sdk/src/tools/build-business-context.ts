@@ -1,4 +1,4 @@
-import type { SimpleSchema } from '@qwery/domain/entities';
+import type { SimpleSchema, SimpleTable } from '@qwery/domain/entities';
 import type {
   BusinessContext,
   BusinessEntity,
@@ -115,7 +115,9 @@ export const buildBusinessContext = async (
   // Filter out system/temp tables (synchronous, fast)
   const filteredSchema = {
     ...opts.schema,
-    tables: opts.schema.tables.filter((t) => !isSystemOrTempTable(t.tableName)),
+    tables: opts.schema.tables.filter(
+      (t: SimpleTable) => !isSystemOrTempTable(t.tableName),
+    ),
   };
 
   if (filteredSchema.tables.length === 0) {

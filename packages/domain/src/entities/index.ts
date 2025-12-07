@@ -8,8 +8,10 @@ export * from './project.type';
 export * from './user.type';
 export * from './resultset.type';
 export * from './playground.type';
-export * from './schema.type';
 export * from './template.type';
 
 // AI Entities
 export * from './ai/index';
+
+// Datasource Meta Entities
+export * from './datasource-meta/index';

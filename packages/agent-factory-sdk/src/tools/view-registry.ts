@@ -2,7 +2,7 @@ import { nanoid } from 'nanoid';
 import type { SimpleSchema, SimpleColumn } from '@qwery/domain/entities';
 
 export interface ViewRecord {
-  viewName: string; // Technical name (unique, sanitized)
+  viewName: string; // Technical name (unique, sanitized) - for foreign DBs, this is the queryable path like "attached_db.schema.table"
   displayName: string; // Semantic name for users
   sourceId: string;
   sharedLink: string;
@@ -10,6 +10,15 @@ export interface ViewRecord {
   updatedAt: string;
   lastUsedAt: string;
   schema?: SimpleSchema; // Cached schema
+  // Multi-datasource support (optional for backward compatibility)
+  datasourceId?: string; // Datasource ID from conversation
+  datasourceProvider?: string; // Extension ID (e.g., 'gsheet-csv', 'postgresql')
+  datasourceType?: 'duckdb-native' | 'foreign-database'; // Type of datasource
+  connectionConfig?: Record<string, unknown>; // For reconnection
+  // Foreign database specific
+  attachedDatabaseName?: string; // Name of attached database (for foreign DBs)
+  foreignSchema?: string; // Original schema name in foreign database
+  foreignTable?: string; // Original table name in foreign database
 }
 
 export interface RegistryContext {
@@ -225,9 +234,25 @@ export function generateSemanticViewName(
     semanticName = inferFromColumnNames(table.columns);
   }
 
-  // Fallback
+  // Strategy 4: Use table name as fallback (better than generic "data")
+  if (!semanticName && table.tableName) {
+    // Try to infer from table name
+    const tableName = table.tableName.toLowerCase();
+    // Remove common prefixes/suffixes
+    const cleanName = tableName
+      .replace(/^tbl_/, '')
+      .replace(/^table_/, '')
+      .replace(/_table$/, '')
+      .replace(/s$/, ''); // Remove plural 's'
+
+    if (cleanName.length > 2) {
+      semanticName = pluralize(cleanName);
+    }
+  }
+
+  // Fallback to table name or generic "data"
   if (!semanticName) {
-    semanticName = 'data';
+    semanticName = table.tableName ? sanitizeViewName(table.tableName) : 'data';
   }
 
   // Sanitize
@@ -270,7 +295,7 @@ export const loadViewRegistry = async (
   }
 };
 
-const saveViewRegistry = async (
+export const saveViewRegistry = async (
   context: RegistryContext,
   records: ViewRecord[],
 ) => {
@@ -324,6 +349,95 @@ export const registerSheetView = async (
     updatedAt: now,
     lastUsedAt: now,
     schema,
+  };
+  existing.push(newRecord);
+  await saveViewRegistry(context, existing);
+  return { record: newRecord, isNew: true };
+};
+
+/**
+ * Register a view from a datasource (supports multi-datasource)
+ */
+export const registerDatasourceView = async (
+  context: RegistryContext,
+  sourceId: string, // Can be datasource ID, table identifier, or Google Sheet ID
+  viewName: string,
+  displayName?: string,
+  schema?: SimpleSchema,
+  options?: {
+    datasourceId?: string;
+    datasourceProvider?: string;
+    datasourceType?: 'duckdb-native' | 'foreign-database';
+    connectionConfig?: Record<string, unknown>;
+    sharedLink?: string; // For backward compatibility with Google Sheets
+    attachedDatabaseName?: string; // Name of attached database (for foreign DBs)
+    foreignSchema?: string; // Original schema name in foreign database
+    foreignTable?: string; // Original table name in foreign database
+  },
+): Promise<{ record: ViewRecord; isNew: boolean }> => {
+  await ensureConversationDir(context);
+  const existing = await loadViewRegistry(context);
+
+  // Try to find existing view by sourceId or datasourceId
+  const match =
+    existing.find((rec) => rec.sourceId === sourceId) ||
+    (options?.datasourceId
+      ? existing.find((rec) => rec.datasourceId === options.datasourceId)
+      : null);
+
+  if (match) {
+    match.updatedAt = new Date().toISOString();
+    match.lastUsedAt = new Date().toISOString();
+    // Update fields if provided
+    if (viewName && viewName !== match.viewName) {
+      match.viewName = viewName;
+    }
+    if (displayName) {
+      match.displayName = displayName;
+    }
+    if (schema) {
+      match.schema = schema;
+    }
+    if (options) {
+      if (options.datasourceId) match.datasourceId = options.datasourceId;
+      if (options.datasourceProvider)
+        match.datasourceProvider = options.datasourceProvider;
+      if (options.datasourceType) match.datasourceType = options.datasourceType;
+      if (options.connectionConfig)
+        match.connectionConfig = options.connectionConfig;
+      if (options.sharedLink) match.sharedLink = options.sharedLink;
+      if (options.attachedDatabaseName)
+        match.attachedDatabaseName = options.attachedDatabaseName;
+      if (options.foreignSchema) match.foreignSchema = options.foreignSchema;
+      if (options.foreignTable) match.foreignTable = options.foreignTable;
+    }
+    await saveViewRegistry(context, existing);
+    return { record: match, isNew: false };
+  }
+
+  const now = new Date().toISOString();
+  const newRecord: ViewRecord = {
+    viewName,
+    displayName: displayName || viewName,
+    sourceId,
+    sharedLink: options?.sharedLink || sourceId, // Fallback to sourceId if no sharedLink
+    createdAt: now,
+    updatedAt: now,
+    lastUsedAt: now,
+    schema,
+    ...(options?.datasourceId && { datasourceId: options.datasourceId }),
+    ...(options?.datasourceProvider && {
+      datasourceProvider: options.datasourceProvider,
+    }),
+    ...(options?.datasourceType && { datasourceType: options.datasourceType }),
+    ...(options?.connectionConfig && {
+      connectionConfig: options.connectionConfig,
+    }),
+    ...(options?.attachedDatabaseName && {
+      attachedDatabaseName: options.attachedDatabaseName,
+    }),
+    ...(options?.foreignSchema && { foreignSchema: options.foreignSchema }),
+    ...(options?.foreignTable && { foreignTable: options.foreignTable }),
   };
   existing.push(newRecord);
   await saveViewRegistry(context, existing);

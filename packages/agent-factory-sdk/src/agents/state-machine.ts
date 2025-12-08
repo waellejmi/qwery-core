@@ -288,6 +288,7 @@ export const createStateMachine = (
                         conversationId: context.conversationId,
                         previousMessages: context.previousMessages,
                         model: context.model,
+                        repositories: repositories,
                       }),
                       onDone: {
                         target: 'completed',

@@ -25,6 +25,7 @@
     "@duckdb/node-api": "1.4.2-r.1",
     "@mlc-ai/web-llm": "^0.2.79",
     "@qwery/domain": "workspace:*",
+    "@qwery/extensions-sdk": "workspace:*",
     "ai": "^5.0.93",
     "ai-sdk-ollama": "^1.0.2",
     "i": "^0.3.7",

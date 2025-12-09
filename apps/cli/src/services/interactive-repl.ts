@@ -263,10 +263,7 @@ export class InteractiveRepl {
       const readDataAgentModule = await import(
         '../../../../packages/agent-factory-sdk/src/agents/actors/read-data-agent.actor.js'
       );
-      const { ReadDataAgent } = readDataAgentModule;
-      const { convertToModelMessages } = await import(
-        '@qwery/agent-factory-sdk'
-      );
+      const { readDataAgent } = readDataAgentModule;
       const { nanoid } = await import('nanoid');
       const { validateUIMessages } = await import('ai');
       const { v4: uuidv4 } = await import('uuid');
@@ -354,15 +351,13 @@ export class InteractiveRepl {
 
       console.log('\n' + colored('💬 Processing...', colors.brand) + '\n');
 
-      // Get the stream from ReadDataAgent (returns StreamTextResult)
-      const readDataAgentInstance = new ReadDataAgent({
-        conversationId: conversation.id,
-      });
-      const agentInstance = await readDataAgentInstance.getAgent();
-      const modelMessages = convertToModelMessages(messages);
-      const streamResult = agentInstance.stream({
-        messages: modelMessages,
-      });
+      // Get the stream from readDataAgent function
+      const streamResult = await readDataAgent(
+        conversation.id,
+        messages,
+        'azure/gpt-5-mini',
+        repositories,
+      );
 
       // Iterate over the stream directly using AI SDK's stream methods
       let fullText = '';

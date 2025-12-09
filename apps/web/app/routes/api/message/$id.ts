@@ -32,16 +32,20 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
     // Update message with new content
     // Convert UIMessage content format to Message content format
-    const updatedContent =
-      typeof content === 'string'
-        ? { text: content }
-        : typeof content === 'object' &&
-            content !== null &&
-            !(content instanceof Date) &&
-            !(content instanceof RegExp) &&
-            'parts' in content
-          ? content
-          : content;
+    let updatedContent: unknown;
+    if (typeof content === 'string') {
+      updatedContent = { text: content };
+    } else if (
+      content !== null &&
+      typeof content === 'object' &&
+      !(content instanceof Date) &&
+      !(content instanceof RegExp) &&
+      'parts' in content
+    ) {
+      updatedContent = content;
+    } else {
+      updatedContent = content;
+    }
 
     const updatedMessage = {
       ...existingMessage,

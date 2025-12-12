@@ -2,6 +2,7 @@ import type { DuckDBInstance } from '@duckdb/node-api';
 import type { IDatasourceRepository } from '@qwery/domain/repositories';
 import { loadDatasources, groupDatasourcesByType } from './datasource-loader';
 import { attachForeignDatasource } from './foreign-datasource-attach';
+import { attachGSheetDatasource } from './gsheet-to-duckdb';
 import { datasourceToDuckdb } from './datasource-to-duckdb';
 import { getDatasourceDatabaseName } from './datasource-name-utils';
 import type { Datasource } from '@qwery/domain/entities';
@@ -282,11 +283,37 @@ class DuckDBInstanceManager {
       );
       const { duckdbNative, foreignDatabases } = groupDatasourcesByType(loaded);
 
+      // Separate Google Sheets from other foreign databases
+      const gsheetDatasources = foreignDatabases.filter(
+        (ds) => ds.datasource.datasource_provider === 'gsheet-csv',
+      );
+      const otherForeignDatabases = foreignDatabases.filter(
+        (ds) => ds.datasource.datasource_provider !== 'gsheet-csv',
+      );
+
       // Detach unchecked foreign databases (OPTIMIZATION: Phase 5.2 - only if detachUnchecked is true)
       const detachStartTime = performance.now();
       let detachCount = 0;
       if (detachUnchecked) {
-        for (const { datasource } of foreignDatabases) {
+        // Detach Google Sheets
+        for (const { datasource } of gsheetDatasources) {
+          const dsId = datasource.id;
+          if (currentAttached.has(dsId) && !checkedSet.has(dsId)) {
+            const detachItemStartTime = performance.now();
+            console.log(
+              `[DuckDBInstanceManager] Detaching Google Sheets datasource: ${dsId}`,
+            );
+            await this.detachForeignDB(conn, datasource);
+            currentAttached.delete(dsId);
+            const detachItemTime = performance.now() - detachItemStartTime;
+            console.log(
+              `[DuckDBInstanceManager] [PERF] Detached ${dsId} in ${detachItemTime.toFixed(2)}ms`,
+            );
+            detachCount++;
+          }
+        }
+        // Detach other foreign databases
+        for (const { datasource } of otherForeignDatabases) {
           const dsId = datasource.id;
           if (currentAttached.has(dsId) && !checkedSet.has(dsId)) {
             const detachItemStartTime = performance.now();
@@ -337,7 +364,37 @@ class DuckDBInstanceManager {
       // Attach newly checked foreign databases
       const attachStartTime = performance.now();
       let attachCount = 0;
-      for (const { datasource } of foreignDatabases) {
+      // Attach Google Sheets
+      for (const { datasource } of gsheetDatasources) {
+        const dsId = datasource.id;
+        if (!currentAttached.has(dsId) && checkedSet.has(dsId)) {
+          try {
+            const attachItemStartTime = performance.now();
+            console.log(
+              `[DuckDBInstanceManager] Attaching Google Sheets datasource: ${dsId}`,
+            );
+            await attachGSheetDatasource({
+              connection: conn,
+              datasource,
+              extractSchema: true, // Need schema to generate semantic table names
+            });
+            currentAttached.add(dsId);
+            const attachItemTime = performance.now() - attachItemStartTime;
+            console.log(
+              `[DuckDBInstanceManager] [PERF] Attached ${dsId} in ${attachItemTime.toFixed(2)}ms`,
+            );
+            attachCount++;
+          } catch (error) {
+            const errorMsg =
+              error instanceof Error ? error.message : String(error);
+            console.error(
+              `[DuckDBInstanceManager] Failed to attach Google Sheets datasource ${dsId}: ${errorMsg}`,
+            );
+          }
+        }
+      }
+      // Attach other foreign databases
+      for (const { datasource } of otherForeignDatabases) {
         const dsId = datasource.id;
         if (!currentAttached.has(dsId) && checkedSet.has(dsId)) {
           try {

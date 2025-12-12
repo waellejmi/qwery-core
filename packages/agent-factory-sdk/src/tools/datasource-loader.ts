@@ -11,10 +11,12 @@ export interface LoadedDatasource {
 /**
  * DuckDB-native datasources are extensions that use DuckDB internally
  * These can create views directly in the conversation's DuckDB instance
+ *
+ * Note: gsheet-csv is now treated as a foreign database (attached database)
+ * to support multiple tabs with datasourcename.tablename format
  */
 const DUCKDB_NATIVE_PROVIDERS = [
   'csv',
-  'gsheet-csv',
   'json-online',
   'parquet-online',
   'youtube-data-api-v3',

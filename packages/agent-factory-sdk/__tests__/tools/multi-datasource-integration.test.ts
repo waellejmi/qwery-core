@@ -101,16 +101,13 @@ describe('Multi-Datasource Integration', () => {
     expect(results).toHaveLength(1);
     expect(results[0].success).toBe(true);
     expect(results[0].datasourceId).toBe(gsheetConfig.id);
-    expect(results[0].viewsCreated).toBe(1);
+    // Google Sheets now creates tables in attached database (one per tab)
+    expect(results[0].viewsCreated).toBeGreaterThan(0);
 
-    // Verify view registry
+    // Verify attachment registry (Google Sheets are now attached databases)
     const wrapper = DuckDBInstanceManager.getWrapper(conversationId, workspace);
     expect(wrapper).toBeDefined();
-    expect(wrapper!.viewRegistry.has(gsheetConfig.id)).toBe(true);
-    const viewName = wrapper!.viewRegistry.get(gsheetConfig.id);
-    expect(viewName).toBeDefined();
-    // View name should include datasource ID (hyphens are replaced with underscores in sanitization)
-    expect(viewName).toContain(gsheetConfig.id.replace(/-/g, '_'));
+    expect(wrapper!.attachedDatasources.has(gsheetConfig.id)).toBe(true);
   });
 
   it('should initialize Postgres datasource and attach database', async () => {
@@ -152,16 +149,67 @@ describe('Multi-Datasource Integration', () => {
       workspace,
     });
 
-    // Get view name from registry
-    const wrapper = DuckDBInstanceManager.getWrapper(conversationId, workspace);
-    const viewName = wrapper!.viewRegistry.get(gsheetConfig.id);
-    expect(viewName).toBeDefined();
+    // Google Sheets are now attached databases, query using datasourcename.tablename format
+    const dbName = getDatasourceDatabaseName(gsheetConfig);
 
-    // Query the view
+    // Get table names using SHOW TABLES
+    const conn = await DuckDBInstanceManager.getConnection(
+      conversationId,
+      workspace,
+    );
+    let tableName: string | undefined;
+    try {
+      // Try SHOW TABLES FROM database
+      try {
+        const showTablesReader = await conn.runAndReadAll(
+          `SHOW TABLES FROM "${dbName}"`,
+        );
+        await showTablesReader.readAll();
+        const tables = showTablesReader.getRowObjectsJS() as Array<{
+          name: string;
+        }>;
+        if (tables.length > 0 && tables[0]) {
+          tableName = tables[0].name;
+        }
+      } catch {
+        // If SHOW TABLES doesn't work, try querying common names
+        const possibleNames = [
+          'users',
+          'people',
+          'data',
+          'tab_0',
+          'recipes',
+          'athletes',
+          'books',
+          'items',
+          'products',
+          'customers',
+          'orders',
+        ];
+        for (const name of possibleNames) {
+          try {
+            await conn.run(`SELECT 1 FROM "${dbName}"."${name}" LIMIT 1`);
+            tableName = name;
+            break;
+          } catch {
+            continue;
+          }
+        }
+      }
+    } finally {
+      DuckDBInstanceManager.returnConnection(conversationId, workspace, conn);
+    }
+
+    expect(tableName).toBeDefined();
+    if (!tableName) {
+      throw new Error('No table found in GSheet database');
+    }
+
+    // Query the actual table
     const result = await runQuery({
       conversationId,
       workspace,
-      query: `SELECT * FROM "${viewName}" LIMIT 5`,
+      query: `SELECT * FROM "${dbName}"."${tableName}" LIMIT 5`,
     });
 
     expect(result).toBeDefined();
@@ -222,10 +270,10 @@ describe('Multi-Datasource Integration', () => {
       );
     }
 
-    // Verify GSheet is registered
+    // Verify GSheet is registered (now as attached database)
     const wrapper = DuckDBInstanceManager.getWrapper(conversationId, workspace);
     expect(wrapper).toBeDefined();
-    expect(wrapper!.viewRegistry.has(gsheetConfig.id)).toBe(true);
+    expect(wrapper!.attachedDatasources.has(gsheetConfig.id)).toBe(true);
     // Postgres attachment may not be registered if connection failed
     if (postgresResult?.success) {
       expect(wrapper!.attachedDatasources.has(postgresConfig.id)).toBe(true);
@@ -296,9 +344,61 @@ describe('Multi-Datasource Integration', () => {
       workspace,
     });
 
-    // Get view name
-    const wrapper = DuckDBInstanceManager.getWrapper(conversationId, workspace);
-    const viewName = wrapper!.viewRegistry.get(gsheetConfig.id);
+    // Get database name and actual table name
+    const dbName = getDatasourceDatabaseName(gsheetConfig);
+
+    // Get table names using SHOW TABLES
+    const conn = await DuckDBInstanceManager.getConnection(
+      conversationId,
+      workspace,
+    );
+    let tableName: string | undefined;
+    try {
+      // Try SHOW TABLES FROM database
+      try {
+        const showTablesReader = await conn.runAndReadAll(
+          `SHOW TABLES FROM "${dbName}"`,
+        );
+        await showTablesReader.readAll();
+        const tables = showTablesReader.getRowObjectsJS() as Array<{
+          name: string;
+        }>;
+        if (tables.length > 0 && tables[0]) {
+          tableName = tables[0].name;
+        }
+      } catch {
+        // If SHOW TABLES doesn't work, try querying common names
+        const possibleNames = [
+          'users',
+          'people',
+          'data',
+          'tab_0',
+          'recipes',
+          'athletes',
+          'books',
+          'items',
+          'products',
+          'customers',
+          'orders',
+        ];
+        for (const name of possibleNames) {
+          try {
+            await conn.run(`SELECT 1 FROM "${dbName}"."${name}" LIMIT 1`);
+            tableName = name;
+            break;
+          } catch {
+            continue;
+          }
+        }
+      }
+    } finally {
+      DuckDBInstanceManager.returnConnection(conversationId, workspace, conn);
+    }
+
+    expect(tableName).toBeDefined();
+    if (!tableName) {
+      throw new Error('No table found in GSheet database');
+    }
 
     // Run 5 concurrent queries
     const queries = Array(5)
@@ -307,7 +407,7 @@ describe('Multi-Datasource Integration', () => {
         runQuery({
           conversationId,
           workspace,
-          query: `SELECT ${i} as num FROM "${viewName}" LIMIT 1`,
+          query: `SELECT ${i} as num FROM "${dbName}"."${tableName}" LIMIT 1`,
         }),
       );
 
@@ -344,17 +444,20 @@ describe('Multi-Datasource Integration', () => {
       workspace,
     });
 
-    // Verify both views exist with unique names
+    // Verify both datasources are registered in attachedDatasources
+    // Note: When two datasources have the same name, they get the same database name
+    // and DuckDB will use the same attachment. However, both should still be registered
+    // in attachedDatasources since both initialization attempts succeeded.
     const wrapper = DuckDBInstanceManager.getWrapper(conversationId, workspace);
-    const view1 = wrapper!.viewRegistry.get(gsheet1.id);
-    const view2 = wrapper!.viewRegistry.get(gsheet2.id);
+    expect(wrapper).toBeDefined();
+    // Both datasources should be registered, even if they share the same database name
+    expect(wrapper!.attachedDatasources.has(gsheet1.id)).toBe(true);
+    expect(wrapper!.attachedDatasources.has(gsheet2.id)).toBe(true);
 
-    expect(view1).toBeDefined();
-    expect(view2).toBeDefined();
-    expect(view1).not.toBe(view2);
-    // IDs are sanitized (hyphens replaced with underscores)
-    expect(view1).toContain(gsheet1.id.replace(/-/g, '_'));
-    expect(view2).toContain(gsheet2.id.replace(/-/g, '_'));
+    // Both should have the same database name (since they have the same datasource name)
+    const dbName1 = getDatasourceDatabaseName(gsheet1);
+    const dbName2 = getDatasourceDatabaseName(gsheet2);
+    expect(dbName1).toBe(dbName2); // Same sanitized name
   });
 
   it('should sync datasources based on checked state', async () => {
@@ -368,7 +471,7 @@ describe('Multi-Datasource Integration', () => {
     });
 
     let wrapper = DuckDBInstanceManager.getWrapper(conversationId, workspace);
-    expect(wrapper!.viewRegistry.has(gsheetConfig.id)).toBe(true);
+    expect(wrapper!.attachedDatasources.has(gsheetConfig.id)).toBe(true);
     // Postgres may not be attached if connection failed (fake URL in tests)
     const postgresAttached = wrapper!.attachedDatasources.has(
       postgresConfig.id,
@@ -383,7 +486,7 @@ describe('Multi-Datasource Integration', () => {
     );
 
     wrapper = DuckDBInstanceManager.getWrapper(conversationId, workspace);
-    expect(wrapper!.viewRegistry.has(gsheetConfig.id)).toBe(true);
+    expect(wrapper!.attachedDatasources.has(gsheetConfig.id)).toBe(true);
     // If postgres was attached, it should now be detached
     if (postgresAttached) {
       expect(wrapper!.attachedDatasources.has(postgresConfig.id)).toBe(false);

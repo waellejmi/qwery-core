@@ -1,4 +1,6 @@
+import React from 'react';
 import type { InitOptions, i18n } from 'i18next';
+import { I18nextProvider } from 'react-i18next';
 
 let i18nInstance: i18n;
 
@@ -15,9 +17,9 @@ export function I18nProvider({
   settings: InitOptions;
   resolver: Resolver;
 }>) {
-  useI18nClient(settings, resolver);
+  const instance = useI18nClient(settings, resolver);
 
-  return children;
+  return <I18nextProvider i18n={instance}>{children}</I18nextProvider>;
 }
 
 /**
@@ -40,10 +42,12 @@ function useI18nClient(settings: InitOptions, resolver: Resolver) {
 
 async function loadI18nInstance(settings: InitOptions, resolver: Resolver) {
   if (typeof document === 'undefined') {
-    const { initializeI18nClient } = await import('./i18n-client');
-    i18nInstance = await initializeI18nClient(settings, resolver);
-  } else {
+    // Server-side: no document object
     const { initializeServerI18n } = await import('./i18n-server');
     i18nInstance = await initializeServerI18n(settings, resolver);
+  } else {
+    // Client-side: document exists
+    const { initializeI18nClient } = await import('./i18n-client');
+    i18nInstance = await initializeI18nClient(settings, resolver);
   }
 }

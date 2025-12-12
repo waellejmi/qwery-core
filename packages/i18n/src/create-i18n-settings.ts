@@ -34,6 +34,8 @@ export function createI18nSettings({
     lowerCaseLng: true as const,
     fallbackNS: ns,
     ns,
+    returnNull: false,
+    returnEmptyString: false,
     react: {
       useSuspense: true,
     },
